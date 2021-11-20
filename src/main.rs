@@ -49,7 +49,7 @@ fn main() {
     let matches = App::new("mknft")
         .version("0.1.0")
         .subcommand(SubCommand::with_name("prepare")
-            .about("Prepare project using Photoshop Document")
+            .about("Prepare NFT project using Photoshop Document")
             .arg(Arg::with_name("src")
                 .help("Project psd filepath")
                 .required(true)
@@ -178,6 +178,8 @@ fn main() {
                     }
                 }
             }
+
+            // todo - add example project
 
             // todo - iterate layers
         }
