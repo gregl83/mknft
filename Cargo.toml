@@ -3,6 +3,11 @@ name = "mknft"
 version = "0.1.0"
 authors = ["Gregory Langlais <general@gregorylanglais.com>"]
 edition = "2021"
+description = "Create NFT Projects"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/gregl83/mknft"
+homepage = "https://crates.io/crates/mknft"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
