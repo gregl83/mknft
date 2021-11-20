@@ -1,0 +1,18 @@
+[package]
+name = "mknft"
+version = "0.1.0"
+authors = ["Gregory Langlais <general@gregorylanglais.com>"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+regex = "1.5.4"
+simple-error = "0.2.3"
+simple_logger = "1.13.0"
+log = { version = "0.4.14", features = ["std"] }
+clap = "2.33.3"
+serde = { version = "1.0.130", features = ["derive"] }
+serde_json = "1.0.68"
+psd = "0.2.0"
+image = "0.23.14"
