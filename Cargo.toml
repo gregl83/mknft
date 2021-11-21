@@ -13,6 +13,7 @@ homepage = "https://crates.io/crates/mknft"
 
 [dependencies]
 regex = "1.5.4"
+rand = "0.8.4"
 simple-error = "0.2.3"
 simple_logger = "1.13.0"
 log = { version = "0.4.14", features = ["std"] }

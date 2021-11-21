@@ -11,6 +11,8 @@ use std::io::Read;
 use std::io::BufReader;
 use std::fs;
 use std::collections::HashMap;
+use rand::prelude::*;
+use rand::distributions::WeightedIndex;
 use regex::Regex;
 use clap::{SubCommand, Arg, App};
 use psd::{ColorMode, Psd, PsdChannelCompression};
@@ -45,6 +47,15 @@ struct Config {
 
 /// Run mknft.
 fn main() {
+    // decide if should be random
+//     let mut rng = thread_rng();
+//     let items = [('a', 0), ('b', 3), ('c', 7)];
+//     let dist2 = WeightedIndex::new(items.iter().map(|item| item.1)).unwrap();
+//     for _ in 0..100 {
+// // 0% chance to print 'a', 30% chance to print 'b', 70% chance to print 'c'
+//         println!("{}", items[dist2.sample(&mut rng)].0);
+//     }
+
     // bootstrap clap cli
     let matches = App::new("mknft")
         .version("0.1.0")
