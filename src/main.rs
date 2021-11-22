@@ -11,6 +11,7 @@ use std::io::Read;
 use std::io::BufReader;
 use std::fs;
 use std::collections::HashMap;
+use std::collections::HashSet;
 use rand::prelude::*;
 use rand::distributions::WeightedIndex;
 use regex::Regex;
@@ -47,15 +48,6 @@ struct Config {
 
 /// Run mknft.
 fn main() {
-    // decide if should be random
-//     let mut rng = thread_rng();
-//     let items = [('a', 0), ('b', 3), ('c', 7)];
-//     let dist2 = WeightedIndex::new(items.iter().map(|item| item.1)).unwrap();
-//     for _ in 0..100 {
-// // 0% chance to print 'a', 30% chance to print 'b', 70% chance to print 'c'
-//         println!("{}", items[dist2.sample(&mut rng)].0);
-//     }
-
     // bootstrap clap cli
     let matches = App::new("mknft")
         .version("0.1.0")
@@ -190,9 +182,52 @@ fn main() {
                 }
             }
 
-            // todo - add example project
+            let mut rng = thread_rng();
 
-            // todo - iterate layers
+            let mut layers: Vec<(String, Vec<DynamicImage>, WeightedIndex<u32>)> = vec![];
+            for attribute in config.attributes.iter() {
+                let mut index: Vec<u32> = vec![];
+                let mut images: Vec<DynamicImage> = vec![];
+                for value in attribute.values.iter() {
+                    index.push(value.weight);
+                    images.push(ImageReader::open(
+                        format!("{}/{}", src, value.path)
+                    ).unwrap().decode().unwrap());
+                }
+                layers.push((
+                    attribute.name.clone(),
+                    images,
+                    WeightedIndex::new(index).unwrap()
+                ));
+            }
+            layers.reverse();
+
+            let sample_size = 6;
+            let mut sampled = 0;
+            let mut image_ids = HashSet::new();
+
+            while sample_size > sampled {
+                let mut target: ImageBuffer::<Rgba<u8>, Vec<_>> = ImageBuffer::new(
+                    layers[0].1[0].width(),
+                    layers[0].1[0].height()
+                );
+
+                let mut image_id = String::new();
+                for (_name, images, weights) in layers.iter() {
+                    let index = weights.sample(&mut rng);
+                    image_id = format!("{}{}", image_id, index);
+                    let image = images.get(index).unwrap();
+                    combine_layers(&image, &mut target);
+                }
+
+                if !image_ids.contains(image_id.as_str()) {
+                    sampled += 1;
+                    target.save(format!("{}/{}.png", dest, sampled)).unwrap();
+                    image_ids.insert(image_id.to_owned());
+                }
+            }
+
+            // todo - write config
         }
         _ => {}
     }
