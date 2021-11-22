@@ -41,7 +41,6 @@ struct Attribute {
 #[derive(Debug, Serialize, Deserialize)]
 struct Config {
     name: String,
-    weight_threshold: u32,
     attributes: Vec<Attribute>
 }
 
@@ -88,7 +87,6 @@ fn main() {
 
             let mut config = Config {
                 name: String::from(name),
-                weight_threshold: 100,
                 attributes: Vec::new()
             };
 
