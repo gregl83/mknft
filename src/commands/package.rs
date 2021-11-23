@@ -18,7 +18,7 @@ use serde_json;
 
 use crate::commands::Config;
 
-pub fn handle(matches: &ArgMatches) {
+pub fn exec(matches: &ArgMatches) {
     let src = matches.value_of("src").unwrap();
     let dest = matches.value_of("dest").unwrap();
 

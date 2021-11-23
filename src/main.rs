@@ -48,8 +48,8 @@ fn main() {
         .get_matches();
 
     match matches.subcommand() {
-        ("prepare", Some(matches)) => prepare::handle(matches),
-        ("package", Some(matches)) => package::handle(matches),
+        ("prepare", Some(matches)) => prepare::exec(matches),
+        ("package", Some(matches)) => package::exec(matches),
         _ => {}
     }
 }

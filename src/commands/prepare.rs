@@ -16,7 +16,7 @@ use crate::commands::AttributeValue;
 use crate::commands::Attribute;
 use crate::commands::Config;
 
-pub fn handle(matches: &ArgMatches) {
+pub fn exec(matches: &ArgMatches) {
     let name = matches.value_of("name").unwrap();
     let src = matches.value_of("src").unwrap();
     let dest = matches.value_of("dest").unwrap();
