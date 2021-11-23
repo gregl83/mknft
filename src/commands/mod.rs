@@ -17,7 +17,21 @@ pub struct Attribute {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Config {
+pub struct ProjectConfig {
     name: String,
     attributes: Vec<Attribute>
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Image {
+    name: String,
+    properties: Vec<String>,
+    path: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PackageConfig {
+    name: String,
+    properties: Vec<String>,
+    images: Vec<Image>
 }

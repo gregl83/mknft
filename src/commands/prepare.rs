@@ -14,14 +14,14 @@ use serde_json;
 
 use crate::commands::AttributeValue;
 use crate::commands::Attribute;
-use crate::commands::Config;
+use crate::commands::ProjectConfig;
 
 pub fn exec(matches: &ArgMatches) {
     let name = matches.value_of("name").unwrap();
     let src = matches.value_of("src").unwrap();
     let dest = matches.value_of("dest").unwrap();
 
-    let mut config = Config {
+    let mut project_config = ProjectConfig {
         name: String::from(name),
         attributes: Vec::new()
     };
@@ -44,7 +44,7 @@ pub fn exec(matches: &ArgMatches) {
             let group_name = psd.group_by_id(group_id - 1).unwrap().name();
             let group_path = format!("{}/{}", dest, group_name);
 
-            config.attributes.push(Attribute {
+            project_config.attributes.push(Attribute {
                 name: String::from(group_name),
                 values: Vec::new()
             });
@@ -75,7 +75,7 @@ pub fn exec(matches: &ArgMatches) {
                         name
                     ));
 
-                    for attribute in config.attributes.iter_mut() {
+                    for attribute in project_config.attributes.iter_mut() {
                         if attribute.name.as_str() == group_name {
                             attribute.values.push(AttributeValue {
                                 name: String::from(name),
@@ -93,8 +93,8 @@ pub fn exec(matches: &ArgMatches) {
             }
         }
     }
+    project_config.attributes.reverse();
 
-    let config_file = fs::File::create(format!("{}/config.json", dest)).unwrap();
-    serde_json::to_writer(config_file, &config);
-
+    let project_config_file = fs::File::create(format!("{}/config.json", dest)).unwrap();
+    serde_json::to_writer(project_config_file, &project_config);
 }
