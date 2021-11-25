@@ -12,6 +12,7 @@ use clap::{SubCommand, Arg, App};
 
 use commands::prepare;
 use commands::package;
+use commands::publish;
 
 /// Run mknft.
 fn main() {
@@ -45,11 +46,18 @@ fn main() {
                 .help("Package directory")
                 .required(true)
                 .index(2)))
+        .subcommand(SubCommand::with_name("publish")
+            .about("Publish NFT package to OpenSea Collection")
+            .arg(Arg::with_name("src")
+                .help("Package directory")
+                .required(true)
+                .index(1)))
         .get_matches();
 
     match matches.subcommand() {
         ("prepare", Some(matches)) => prepare::exec(matches),
         ("package", Some(matches)) => package::exec(matches),
+        ("publish", Some(matches)) => publish::exec(matches),
         _ => {}
     }
 }
