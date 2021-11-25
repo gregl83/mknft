@@ -8,6 +8,7 @@
 
 mod commands;
 
+use tokio;
 use clap::{SubCommand, Arg, App};
 
 use commands::prepare;
@@ -15,7 +16,8 @@ use commands::package;
 use commands::publish;
 
 /// Run mknft.
-fn main() {
+#[tokio::main]
+async fn main() {
     // bootstrap clap cli
     let matches = App::new("mknft")
         .version("0.1.0")
@@ -55,9 +57,9 @@ fn main() {
         .get_matches();
 
     match matches.subcommand() {
-        ("prepare", Some(matches)) => prepare::exec(matches),
-        ("package", Some(matches)) => package::exec(matches),
-        ("publish", Some(matches)) => publish::exec(matches),
+        ("prepare", Some(matches)) => prepare::exec(matches).await,
+        ("package", Some(matches)) => package::exec(matches).await,
+        ("publish", Some(matches)) => publish::exec(matches).await,
         _ => {}
     }
 }

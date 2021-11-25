@@ -20,7 +20,7 @@ use crate::commands::Image;
 use crate::commands::ProjectConfig;
 use crate::commands::PackageConfig;
 
-pub fn exec(matches: &ArgMatches) {
+pub async fn exec(matches: &ArgMatches<'_>) {
     let src = matches.value_of("src").unwrap();
     let dest = matches.value_of("dest").unwrap();
     let image_dest = format!("{}/images", dest);
