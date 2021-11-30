@@ -4,12 +4,20 @@ pub mod publish;
 
 use serde::{Deserialize, Serialize};
 
+/// Config exclude Attribute or AttributeValue by name
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Exclude {
+    attribute_name: String,
+    values: Vec<String>
+}
+
 /// Project attribute value representing PSD layers
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AttributeValue {
     name: String,
     path: String,
-    weight: u32
+    weight: u32,
+    excludes: Vec<Exclude>
 }
 
 /// Project attribute having collection of values or PSD layers
