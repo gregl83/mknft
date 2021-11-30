@@ -5,52 +5,45 @@ pub mod publish;
 use serde::{Deserialize, Serialize};
 
 /// Config exclude Attribute or AttributeValue by name
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Exclude {
     attribute_name: String,
     values: Vec<String>
 }
 
 /// Project attribute value representing PSD layers
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AttributeValue {
     name: String,
-    path: String,
+    path: Option<String>,
     weight: u32,
     excludes: Vec<Exclude>
 }
 
 /// Project attribute having collection of values or PSD layers
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Attribute {
     name: String,
     values: Vec<AttributeValue>
 }
 
-/// Config for `mknft` used when parsing PSD
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Config {
-    name: String,
-    attributes: Vec<Attribute>
-}
-
-/// Project config prepared using `prepare` command
-#[derive(Debug, Serialize, Deserialize)]
+/// Project config used by `prepare` command
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ProjectConfig {
     name: String,
     attributes: Vec<Attribute>
 }
 
-/// Image (NFT) packaged using `package` command
-#[derive(Debug, Serialize, Deserialize)]
+/// Image (NFT) created using `package` command
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Image {
     name: String,
     properties: Vec<String>,
     path: String,
 }
 
-/// Package config packaged using `package` command
-#[derive(Debug, Serialize, Deserialize)]
+/// Package config created using `package` command
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PackageConfig {
     name: String,
     properties: Vec<String>,

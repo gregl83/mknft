@@ -1,0 +1,62 @@
+{
+  "name": "example",
+  "attributes": [
+    {
+      "name": "outline",
+      "values": [
+        {
+          "name": "circle",
+          "path": null,
+          "weight": 10,
+          "excludes": []
+        }
+      ]
+    },
+    {
+      "name": "color",
+      "values": [
+        {
+          "name": "blue",
+          "path": null,
+          "weight": 10,
+          "excludes": []
+        },
+        {
+          "name": "green",
+          "path": null,
+          "weight": 10,
+          "excludes": []
+        },
+        {
+          "name": "red",
+          "path": null,
+          "weight": 10,
+          "excludes": []
+        }
+      ]
+    },
+    {
+      "name":"dots",
+      "values": [
+        {
+          "name": "3",
+          "path": null,
+          "weight": 10,
+          "excludes": []
+        },
+        {
+          "name": "2",
+          "path": null,
+          "weight": 10,
+          "excludes": []
+        },
+        {
+          "name": "1",
+          "path": null,
+          "weight": 10,
+          "excludes": []
+        }
+      ]
+    }
+  ]
+}

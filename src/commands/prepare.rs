@@ -1,6 +1,7 @@
 use std::io;
 use std::io::Read;
 use std::io::BufReader;
+use std::path::PathBuf;
 use std::fs;
 use regex::Regex;
 use clap::{SubCommand, ArgMatches, Arg, App};
@@ -21,9 +22,16 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let dest = matches.value_of("dest").unwrap();
     let name = matches.value_of("name").unwrap();
 
-    let mut project_config = ProjectConfig {
-        name: String::from(name),
-        attributes: Vec::new()
+    let path = PathBuf::from(src);
+    let dir = path.parent().unwrap();
+    let config_file = fs::File::open(format!("{}/config.json", dir.as_os_str().to_str().unwrap()));
+
+    let mut project_config = match config_file {
+        Ok(file) => serde_json::from_reader(file).unwrap(),
+        _ => ProjectConfig {
+            name: String::from(name),
+            attributes: vec![]
+        }
     };
 
     let file = fs::File::open(src).expect("file should open read only");
@@ -44,10 +52,12 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             let group_name = psd.group_by_id(group_id - 1).unwrap().name();
             let group_path = format!("{}/{}", dest, group_name);
 
-            project_config.attributes.push(Attribute {
-                name: String::from(group_name),
-                values: Vec::new()
-            });
+            if !project_config.attributes.iter().any(|attribute| attribute.name == group_name) {
+                project_config.attributes.push(Attribute {
+                    name: String::from(group_name),
+                    values: Vec::new()
+                });
+            }
 
             fs::create_dir(group_path).unwrap();
 
@@ -75,18 +85,17 @@ pub async fn exec(matches: &ArgMatches<'_>) {
                         name
                     ));
 
-                    for attribute in project_config.attributes.iter_mut() {
-                        if attribute.name.as_str() == group_name {
+                    let image_path = format!("{}/{}.png", group_name, name);
+                    if let Some(attribute) = project_config.attributes.iter_mut().find(|attribute| attribute.name == group_name) {
+                        if let Some(attribute_value) = attribute.values.iter_mut().find(|attribute_value| attribute_value.name == name) {
+                            attribute_value.path = Some(image_path);
+                        } else {
                             attribute.values.push(AttributeValue {
                                 name: String::from(name),
-                                path: format!(
-                                    "{}/{}.png",
-                                    group_name,
-                                    name
-                                ),
-                                weight: 10
+                                path: Some(image_path),
+                                weight: 10,
+                                excludes: vec![]
                             });
-                            break;
                         }
                     }
                 }

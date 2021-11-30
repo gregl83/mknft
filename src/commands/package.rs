@@ -54,11 +54,13 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         let mut index: Vec<u32> = vec![];
         let mut images: Vec<(String, DynamicImage)> = vec![];
         for value in attribute.values.iter() {
-            index.push(value.weight);
-            images.push((
-                value.name.clone(),
-                ImageReader::open(format!("{}/{}", src, value.path)).unwrap().decode().unwrap()
-            ));
+            if let Some(value_path) = &value.path {
+                index.push(value.weight);
+                images.push((
+                    value.name.clone(),
+                    ImageReader::open(format!("{}/{}", src, value_path)).unwrap().decode().unwrap()
+                ));
+            }
         }
         layers.push((
             images,
