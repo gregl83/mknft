@@ -38,6 +38,7 @@ pub struct ProjectConfig {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Image {
     name: String,
+    probability: f32,
     properties: Vec<String>,
     path: String,
 }

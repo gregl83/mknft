@@ -75,6 +75,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         );
     }
 
+    // fixme - sample size
     let sample_size = 6;
     let mut sampled = 0;
     let mut hashes: HashSet<String> = HashSet::new();
@@ -83,6 +84,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         // fixme - determine name of layer
         let mut package_image = Image {
             name: format!("{}", sampled + 1),
+            probability: 0 as f32,
             properties: vec![],
             path: String::new()
         };
@@ -115,8 +117,8 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         }
 
         // todo - calculate rarity of each item
-        // todo - re-order by rarity
-        // todo - blank image for each layer
+        // todo - re-order by rarity (separate command?)
+        // todo - blank image for each layer (None layer)
 
         // check for exclusion collision
         let mut exclude_collision = false;
