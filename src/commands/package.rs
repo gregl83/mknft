@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use std::collections::HashSet;
 use std::fmt::format;
 use std::hash::Hash;
+use std::ops::Mul;
 use sha2::{Sha256, Digest};
 use rand::prelude::*;
 use rand::distributions::WeightedIndex;
@@ -84,7 +85,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         // fixme - determine name of layer
         let mut package_image = Image {
             name: format!("{}", sampled + 1),
-            probability: 0 as f32,
+            probability: 1.0 as f32,
             properties: vec![],
             path: String::new()
         };
@@ -114,11 +115,10 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             package_image.properties.push(
                 to_title_case(image_config.name.as_str())
             );
+            package_image.probability = package_image.probability.mul(image_config.probability.unwrap());
         }
 
-        // todo - calculate rarity of each item
         // todo - re-order by rarity (separate command?)
-        // todo - blank image for each layer (None layer)
 
         // check for exclusion collision
         let mut exclude_collision = false;
