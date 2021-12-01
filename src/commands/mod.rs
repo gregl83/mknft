@@ -15,6 +15,7 @@ pub struct Exclude {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct AttributeValue {
     name: String,
+    probability: Option<f32>,
     path: Option<String>,
     weight: u32,
     excludes: Vec<Exclude>

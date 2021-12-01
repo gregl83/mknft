@@ -3,6 +3,7 @@ use std::io::Read;
 use std::io::BufReader;
 use std::path::PathBuf;
 use std::fs;
+use std::ops::Div;
 use regex::Regex;
 use clap::{SubCommand, ArgMatches, Arg, App};
 use psd::{ColorMode, Psd, PsdChannelCompression};
@@ -92,6 +93,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
                         } else {
                             attribute.values.push(AttributeValue {
                                 name: String::from(name),
+                                probability: Some(0 as f32), // set temp probability
                                 path: Some(image_path),
                                 weight: 10,
                                 excludes: vec![]
@@ -100,6 +102,16 @@ pub async fn exec(matches: &ArgMatches<'_>) {
                     }
                 }
             }
+        }
+    }
+
+    // calculate probabilities
+    for attribute in project_config.attributes.iter_mut() {
+        let attribute_weights: Vec<f32> = attribute.values.iter().map(|layer| layer.weight as f32).collect();
+        let attribute_weight: f32 = attribute_weights.iter().sum();
+        for attribute_value in attribute.values.iter_mut() {
+            let denominator = attribute_value.weight as f32;
+            attribute_value.probability = Some(denominator.div(attribute_weight));
         }
     }
 
