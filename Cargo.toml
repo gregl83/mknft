@@ -15,6 +15,7 @@ homepage = "https://crates.io/crates/mknft"
 tokio = { version = "1.0", features = ["full"] }
 regex = "1.5.4"
 rand = "0.8.4"
+sha2 = "0.9.8"
 simple-error = "0.2.3"
 simple_logger = "1.13.0"
 log = { version = "0.4.14", features = ["std"] }

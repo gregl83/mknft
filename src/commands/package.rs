@@ -4,6 +4,8 @@ use std::io::BufReader;
 use std::fs;
 use std::collections::HashMap;
 use std::collections::HashSet;
+use std::hash::Hash;
+use sha2::{Sha256, Digest};
 use rand::prelude::*;
 use rand::distributions::WeightedIndex;
 use regex::Regex;
@@ -49,6 +51,9 @@ pub async fn exec(matches: &ArgMatches<'_>) {
 
     let mut rng = thread_rng();
 
+    // fixme - support excludes
+    // detect exclusion
+
     let mut layers: Vec<(Vec<(String, DynamicImage)>, WeightedIndex<u32>)> = vec![];
     for attribute in project_config.attributes.iter() {
         let mut index: Vec<u32> = vec![];
@@ -71,7 +76,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
 
     let sample_size = 6;
     let mut sampled = 0;
-    let mut image_ids = HashSet::new();
+    let mut hashes: HashSet<String> = HashSet::new();
 
     while sample_size > sampled {
         let mut package_image = Image {
@@ -94,11 +99,18 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             package_image.properties.push(name.clone());
         }
 
-        if !image_ids.contains(image_id.as_str()) {
+        // generate image hash for duplicate detection
+        let mut hasher = Sha256::new();
+        hasher.update(target.as_ref());
+        let hasher_result = hasher.finalize();
+        let hash = format!("{:X}", hasher_result);
+
+        if !hashes.contains(hash.as_str()) {
             sampled += 1;
             let image_path = format!("{}/{}.png", image_dest.clone(), sampled);
             target.save(image_path.clone()).unwrap();
-            image_ids.insert(image_id.to_owned());
+
+            hashes.insert(hash.to_owned());
             package_image.path = image_path;
             package_config.images.push(package_image);
         }
