@@ -18,6 +18,7 @@ use image::ImageBuffer;
 use image::Rgba;
 use serde::{Deserialize, Serialize};
 use serde_json;
+use inflector::cases::titlecase::to_title_case;
 
 use crate::commands::Image;
 use crate::commands::ProjectConfig;
@@ -77,6 +78,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let mut hashes: HashSet<String> = HashSet::new();
 
     while sample_size > sampled {
+        // fixme - determine name of layer
         let mut package_image = Image {
             name: format!("{}", sampled + 1),
             properties: vec![],
@@ -105,8 +107,14 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             used.push(format!("{}:{}", attribute.name.clone(), image_config.name.clone()));
             let image = images.get(image_index).unwrap();
             combine_layers(&image, &mut target);
-            package_image.properties.push(image_config.name.clone());
+            package_image.properties.push(
+                to_title_case(image_config.name.as_str())
+            );
         }
+
+        // todo - calculate rarity of each item
+        // todo - re-order by rarity
+        // todo - blank image for each layer
 
         // check for exclusion collision
         let mut exclude_collision = false;
