@@ -70,7 +70,9 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             images,
             WeightedIndex::new(index).unwrap()
         ));
-        package_config.properties.push(attribute.name.clone());
+        package_config.properties.push(
+            to_title_case(attribute.name.as_str())
+        );
     }
 
     let sample_size = 6;
