@@ -6,7 +6,6 @@
       "values": [
         {
           "name": "circle",
-          "path": null,
           "weight": 10,
           "excludes": []
         }
@@ -17,19 +16,16 @@
       "values": [
         {
           "name": "blue",
-          "path": null,
           "weight": 10,
           "excludes": []
         },
         {
           "name": "green",
-          "path": null,
           "weight": 10,
           "excludes": []
         },
         {
           "name": "red",
-          "path": null,
           "weight": 10,
           "excludes": []
         }
@@ -40,19 +36,16 @@
       "values": [
         {
           "name": "3",
-          "path": null,
           "weight": 10,
           "excludes": []
         },
         {
           "name": "2",
-          "path": null,
           "weight": 10,
           "excludes": []
         },
         {
           "name": "1",
-          "path": null,
           "weight": 10,
           "excludes": []
         }
