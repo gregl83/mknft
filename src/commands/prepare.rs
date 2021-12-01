@@ -102,7 +102,6 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             }
         }
     }
-    project_config.attributes.reverse();
 
     let project_config_file = fs::File::create(format!("{}/config.json", dest)).unwrap();
     serde_json::to_writer(project_config_file, &project_config);
