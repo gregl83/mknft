@@ -16,12 +16,12 @@
       "values": [
         {
           "name": "blue",
-          "weight": 10,
+          "weight": 30,
           "excludes": []
         },
         {
           "name": "green",
-          "weight": 10,
+          "weight": 20,
           "excludes": []
         },
         {
@@ -36,12 +36,12 @@
       "values": [
         {
           "name": "3",
-          "weight": 10,
+          "weight": 20,
           "excludes": []
         },
         {
           "name": "2",
-          "weight": 10,
+          "weight": 30,
           "excludes": []
         },
         {
