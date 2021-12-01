@@ -38,6 +38,7 @@ fn combine_layers(source : &DynamicImage, target: &mut ImageBuffer<Rgba<u8>, Vec
 pub async fn exec(matches: &ArgMatches<'_>) {
     let src = matches.value_of("src").unwrap();
     let dest = matches.value_of("dest").unwrap();
+    let size = matches.value_of("size").unwrap().parse::<u32>().unwrap();
     let image_dest = format!("{}/images", dest);
 
     let file = fs::File::open(format!("{}/config.json", src)).expect("file should open read only");
@@ -76,12 +77,9 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         );
     }
 
-    // fixme - sample size
-    let sample_size = 6;
     let mut sampled = 0;
     let mut hashes: HashSet<String> = HashSet::new();
-
-    while sample_size > sampled {
+    while size > sampled {
         // fixme - determine name of layer
         let mut package_image = Image {
             name: format!("{}", sampled + 1),
@@ -146,6 +144,8 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             }
         }
     }
+
+    // todo - graph distribution and display
 
     let package_config_file = fs::File::create(format!("{}/config.json", dest)).unwrap();
     serde_json::to_writer(package_config_file, &package_config);
