@@ -147,6 +147,11 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
         let create_button = driver.find_element(By::XPath("//button[contains(text(), 'Create')]")).await?;
         create_button.click().await?;
 
+        // verify complete
+        let expected_completion_message = format!("//h4[contains(text(), 'You created {}!')]", image.name);
+        let completion_message = driver.find_element(By::XPath(expected_completion_message.as_str())).await?;
+        completion_message.wait_until().displayed().await?;
+
         // add another nft
         driver.get("https://opensea.io/collections").await?;
 
