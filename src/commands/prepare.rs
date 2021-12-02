@@ -1,17 +1,13 @@
-use std::io;
 use std::io::Read;
 use std::io::BufReader;
 use std::path::PathBuf;
 use std::fs;
 use std::ops::Div;
 use regex::Regex;
-use clap::{SubCommand, ArgMatches, Arg, App};
-use psd::{ColorMode, Psd, PsdChannelCompression};
-use image::io::Reader as ImageReader;
-use image::{GenericImageView, DynamicImage, Pixel};
+use clap::ArgMatches;
+use psd::Psd;
 use image::ImageBuffer;
 use image::Rgba;
-use serde::{Deserialize, Serialize};
 use serde_json;
 
 use crate::commands::AttributeValue;
@@ -31,6 +27,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         Ok(file) => serde_json::from_reader(file).unwrap(),
         _ => ProjectConfig {
             name: String::from(name),
+            uri: None,
             attributes: vec![]
         }
     };
@@ -84,7 +81,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
                         dest,
                         group_name,
                         name
-                    ));
+                    )).unwrap();
 
                     let image_path = format!("{}/{}.png", group_name, name);
                     if let Some(attribute) = project_config.attributes.iter_mut().find(|attribute| attribute.name == group_name) {
@@ -116,5 +113,5 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     }
 
     let project_config_file = fs::File::create(format!("{}/config.json", dest)).unwrap();
-    serde_json::to_writer(project_config_file, &project_config);
+    serde_json::to_writer(project_config_file, &project_config).unwrap();
 }

@@ -1,24 +1,15 @@
-use std::io;
-use std::io::Read;
-use std::io::BufReader;
 use std::fs;
-use std::collections::HashMap;
 use std::collections::HashSet;
-use std::fmt::format;
-use std::hash::Hash;
 use std::ops::Mul;
 use sha2::{Sha256, Digest};
 use rand::prelude::*;
 use rand::distributions::WeightedIndex;
 use rand::distributions::uniform::SampleBorrow;
-use regex::Regex;
-use clap::{SubCommand, Arg, ArgMatches, App};
-use psd::{ColorMode, Psd, PsdChannelCompression};
+use clap::ArgMatches;
 use image::io::Reader as ImageReader;
-use image::{GenericImageView, DynamicImage, Pixel};
+use image::{GenericImageView, DynamicImage};
 use image::ImageBuffer;
 use image::Rgba;
-use serde::{Deserialize, Serialize};
 use serde_json;
 use inflector::cases::titlecase::to_title_case;
 
@@ -84,9 +75,16 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let mut sampled = 0;
     let mut hashes: HashSet<String> = HashSet::new();
     while size > sampled {
+        let image_name = format!("{}", sampled + 1);
+        let image_uri = match project_config.uri.clone() {
+            Some(project_uri) => Some(format!("{}/{}.png", project_uri, image_name.clone())),
+            _ => None
+        };
+
         // fixme - determine name of layer
         let mut package_image = Image {
-            name: format!("{}", sampled + 1),
+            name: image_name.clone(),
+            uri: image_uri,
             probability: 1.0 as f32,
             properties: vec![],
             path: String::new()
@@ -155,6 +153,10 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             let image_path = format!("{}/{}.png", image_temp_dest, image_name.clone());
             fs::rename(image.path.clone(), image_path.clone()).unwrap();
             image.name = image_name.clone();
+            image.uri = match project_config.uri.clone() {
+                Some(project_uri) => Some(format!("{}/{}.png", project_uri, image_name.clone())),
+                _ => None
+            };
             image.path = format!("{}/{}.png", image_dest, image_name.clone());
         }
         fs::remove_dir(image_dest.clone()).unwrap();
@@ -164,5 +166,5 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     // todo - graph distribution and display
 
     let package_config_file = fs::File::create(format!("{}/config.json", dest)).unwrap();
-    serde_json::to_writer(package_config_file, &package_config);
+    serde_json::to_writer(package_config_file, &package_config).unwrap();
 }

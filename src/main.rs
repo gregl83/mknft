@@ -64,6 +64,7 @@ async fn main() {
                 .short("o")
                 .long("order")
                 .value_name("ORDER")
+                .default_value("random")
                 .help("Order of collection")
                 .takes_value(true)
                 .possible_values(&Order::variants())

@@ -1,13 +1,12 @@
+use std::fs;
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
-use clap::{SubCommand, ArgMatches, Arg, App};
+use clap::{ArgMatches};
 use thirtyfour::GenericWebDriver;
 use thirtyfour::http::reqwest_async::ReqwestDriverAsync;
 use thirtyfour::prelude::*;
 
-use crate::commands::AttributeValue;
-use crate::commands::Attribute;
-use crate::commands::ProjectConfig;
+use crate::commands::PackageConfig;
 
 use tokio::time::{sleep, Duration};
 
@@ -56,7 +55,7 @@ async fn install_metamask(
     WebDriverResult::Ok(())
 }
 
-async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>) -> WebDriverResult<()> {
+async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: PackageConfig) -> WebDriverResult<()> {
     // go to OpenSea NFT marketplace login page (referrer collections)
     driver.get("https://opensea.io/login?referrer=%2Fcollections").await?;
 
@@ -78,6 +77,48 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>) -> WebDriverResu
     let connect_button = driver.find_element(By::XPath("//button[contains(text(), 'Connect')]")).await?;
     connect_button.click().await?;
 
+    sleep(Duration::from_millis(1000)).await;
+
+    // select main tab
+    let windows = driver.window_handles().await?;
+    driver.switch_to().window(&windows[0]).await?;
+
+    sleep(Duration::from_millis(1000)).await;
+
+    // select collection
+    let xpath = format!("//main//section//div[contains(text(), '{}')]", package_config.name);
+    let collection_name = driver.find_element(By::XPath(xpath.as_str())).await?;
+    collection_name.click().await?;
+
+    sleep(Duration::from_millis(1000)).await;
+
+    // add item
+    let add_item = driver.find_element(By::XPath("//main//a[contains(text(), 'Add item')]")).await?;
+    add_item.click().await?;
+
+    sleep(Duration::from_millis(1000)).await;
+
+    // select metamask tab
+    let windows = driver.window_handles().await?;
+    driver.switch_to().window(&windows[2]).await?;
+
+    // sign
+    let sign = driver.find_element(By::XPath("//button[contains(text(), 'Sign')]")).await?;
+    sign.click().await?;
+
+    sleep(Duration::from_millis(1000)).await;
+
+    // select main tab
+    let windows = driver.window_handles().await?;
+    driver.switch_to().window(&windows[0]).await?;
+
+    // description
+
+    // link
+
+    // name
+
+
     // todo - select collection instead of create
 
     sleep(Duration::from_millis(60000)).await;
@@ -86,6 +127,7 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>) -> WebDriverResu
 }
 
 pub async fn exec(matches: &ArgMatches<'_>) {
+    let src = matches.value_of("src").unwrap();
     let selenium_host = matches.value_of("host").unwrap();
     let metamask_crx = matches.value_of("crx").unwrap();
     let metamask_phrase = matches.value_of("phrase").unwrap();
@@ -95,9 +137,12 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         .map(char::from)
         .collect();
 
+    let file = fs::File::open(format!("{}/config.json", src)).expect("file should open read only");
+    let package_config: PackageConfig = serde_json::from_reader(file).unwrap();
+
     let mut caps = DesiredCapabilities::chrome();
 
-    caps.add_extension(metamask_crx.as_ref());
+    caps.add_extension(metamask_crx.as_ref()).unwrap();
 
     let driver = WebDriver::new(
         format!("http://{}", selenium_host).as_str(),
@@ -111,7 +156,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     ).await {
         println!("MetaMask installation error! {:?}", e);
     } else {
-        match publish(&driver).await {
+        match publish(&driver, package_config).await {
             Ok(_) => println!("done!"),
             Err(e) => println!("Publish error! {:?}", e),
         }

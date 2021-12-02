@@ -32,6 +32,7 @@ pub struct Attribute {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ProjectConfig {
     name: String,
+    uri: Option<String>,
     attributes: Vec<Attribute>
 }
 
@@ -39,6 +40,7 @@ pub struct ProjectConfig {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Image {
     name: String,
+    uri: Option<String>,
     probability: f32,
     properties: Vec<String>,
     path: String,
