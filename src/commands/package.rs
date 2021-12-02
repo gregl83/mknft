@@ -151,9 +151,11 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         package_config.images.sort_by(|a, b| a.probability.partial_cmp(b.probability.borrow()).unwrap());
         fs::create_dir(image_temp_dest.clone()).unwrap();
         for (index, image) in package_config.images.iter_mut().enumerate() {
-            let image_path = format!("{}/{}.png", image_temp_dest, index + 1);
+            let image_name = String::from(format!("{}", index + 1)); // fixme - if naming becomes a thing
+            let image_path = format!("{}/{}.png", image_temp_dest, image_name.clone());
             fs::rename(image.path.clone(), image_path.clone()).unwrap();
-            image.path = image_path.clone();
+            image.name = image_name.clone();
+            image.path = format!("{}/{}.png", image_dest, image_name.clone());
         }
         fs::remove_dir(image_dest.clone()).unwrap();
         fs::rename(image_temp_dest.clone(), image_dest.clone()).unwrap();
