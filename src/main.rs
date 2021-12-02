@@ -9,11 +9,19 @@
 mod commands;
 
 use tokio;
-use clap::{SubCommand, Arg, App};
+use clap::{SubCommand, Arg, App, arg_enum};
 
 use commands::prepare;
 use commands::package;
 use commands::publish;
+
+arg_enum! {
+    #[derive(PartialEq, Debug)]
+    pub enum Order {
+        Rarest,
+        Random
+    }
+}
 
 /// Run mknft.
 #[tokio::main]
@@ -51,7 +59,15 @@ async fn main() {
             .arg(Arg::with_name("size")
                 .help("Size of collection (near combination limit can loop indefinitely)")
                 .required(true)
-                .index(3)))
+                .index(3))
+            .arg(Arg::with_name("order")
+                .short("o")
+                .long("order")
+                .value_name("ORDER")
+                .help("Order of collection")
+                .takes_value(true)
+                .possible_values(&Order::variants())
+                .case_insensitive(true)))
         .subcommand(SubCommand::with_name("publish")
             .about("Publish NFT package to OpenSea Collection")
             .arg(Arg::with_name("src")

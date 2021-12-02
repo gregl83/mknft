@@ -10,6 +10,7 @@ use std::ops::Mul;
 use sha2::{Sha256, Digest};
 use rand::prelude::*;
 use rand::distributions::WeightedIndex;
+use rand::distributions::uniform::SampleBorrow;
 use regex::Regex;
 use clap::{SubCommand, Arg, ArgMatches, App};
 use psd::{ColorMode, Psd, PsdChannelCompression};
@@ -39,7 +40,10 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let src = matches.value_of("src").unwrap();
     let dest = matches.value_of("dest").unwrap();
     let size = matches.value_of("size").unwrap().parse::<u32>().unwrap();
+    let order = matches.value_of("order").unwrap();
+
     let image_dest = format!("{}/images", dest);
+    let image_temp_dest = format!("{}/tmp", dest);
 
     let file = fs::File::open(format!("{}/config.json", src)).expect("file should open read only");
     let project_config: ProjectConfig = serde_json::from_reader(file).unwrap();
@@ -116,8 +120,6 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             package_image.probability = package_image.probability.mul(image_config.probability.unwrap());
         }
 
-        // todo - re-order by rarity (separate command?)
-
         // check for exclusion collision
         let mut exclude_collision = false;
         for u in used {
@@ -143,6 +145,18 @@ pub async fn exec(matches: &ArgMatches<'_>) {
                 package_config.images.push(package_image);
             }
         }
+    }
+
+    if order == "rarest" {
+        package_config.images.sort_by(|a, b| a.probability.partial_cmp(b.probability.borrow()).unwrap());
+        fs::create_dir(image_temp_dest.clone()).unwrap();
+        for (index, image) in package_config.images.iter_mut().enumerate() {
+            let image_path = format!("{}/{}.png", image_temp_dest, index);
+            fs::rename(image.path.clone(), image_path.clone()).unwrap();
+            image.path = image_path.clone();
+        }
+        fs::remove_dir(image_dest.clone()).unwrap();
+        fs::rename(image_temp_dest.clone(), image_dest.clone()).unwrap();
     }
 
     // todo - graph distribution and display
