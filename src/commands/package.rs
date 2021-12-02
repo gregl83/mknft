@@ -151,7 +151,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         package_config.images.sort_by(|a, b| a.probability.partial_cmp(b.probability.borrow()).unwrap());
         fs::create_dir(image_temp_dest.clone()).unwrap();
         for (index, image) in package_config.images.iter_mut().enumerate() {
-            let image_path = format!("{}/{}.png", image_temp_dest, index);
+            let image_path = format!("{}/{}.png", image_temp_dest, index + 1);
             fs::rename(image.path.clone(), image_path.clone()).unwrap();
             image.path = image_path.clone();
         }
