@@ -136,10 +136,9 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             // generate image if new/unique
             if !hashes.contains(hash.as_str()) {
                 sampled += 1;
-                let image_path = format!("{}/{}.png", image_dest.clone(), sampled);
-                target.save(image_path.clone()).unwrap();
+                target.save(format!("{}/{}.png", image_dest.clone(), sampled)).unwrap();
                 hashes.insert(hash.to_owned());
-                package_image.path = image_path;
+                package_image.path = format!("images/{}.png", sampled);
                 package_config.images.push(package_image);
             }
         }

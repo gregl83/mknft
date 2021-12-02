@@ -63,8 +63,6 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
     let metamask_item = driver.find_element(By::XPath("//main//li//button//div//span[contains(text(), 'MetaMask')]")).await?;
     metamask_item.click().await?;
 
-    sleep(Duration::from_millis(1000)).await;
-
     // select metamask connect window
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[2]).await?;
@@ -77,20 +75,14 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
     let connect_button = driver.find_element(By::XPath("//button[contains(text(), 'Connect')]")).await?;
     connect_button.click().await?;
 
-    sleep(Duration::from_millis(1000)).await;
-
     // select main tab
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[0]).await?;
-
-    sleep(Duration::from_millis(1000)).await;
 
     // select collection
     let xpath = format!("//main//section//div[contains(text(), '{}')]", package_config.name);
     let collection_name = driver.find_element(By::XPath(xpath.as_str())).await?;
     collection_name.click().await?;
-
-    sleep(Duration::from_millis(1000)).await;
 
     // add item
     let add_item = driver.find_element(By::XPath("//main//a[contains(text(), 'Add item')]")).await?;
@@ -106,22 +98,67 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
     let sign = driver.find_element(By::XPath("//button[contains(text(), 'Sign')]")).await?;
     sign.click().await?;
 
-    sleep(Duration::from_millis(1000)).await;
-
     // select main tab
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[0]).await?;
 
-    // description
+    for image in package_config.images {
+        // upload image
+        let media_input = driver.find_element(By::XPath("//input[contains(@id, 'media')]")).await?;
+        media_input.send_keys(format!("/home/seluser/{}", image.path)).await?;
 
-    // link
+        // set name
+        let name_input = driver.find_element(By::XPath("//input[contains(@id, 'name')]")).await?;
+        name_input.send_keys(image.name).await?;
 
-    // name
+        // set description
+        // let description_input = driver.find_element(By::XPath("//input[contains(@id, 'description')]")).await?;
+        // description_input.send_keys("name").await?;
 
+        // set external link
+        if let Some(image_uri) = image.uri {
+            let link_input = driver.find_element(By::XPath("//input[contains(@id, 'external_link')]")).await?;
+            link_input.send_keys(image_uri).await?;
+        }
 
-    // todo - select collection instead of create
+        // add properties
+        let property_button = driver.find_element(By::XPath("//button[contains(@aria-label, 'Add properties')]")).await?;
+        property_button.click().await?;
+        for (index, property) in image.properties.iter().enumerate() {
+            let xpath = format!("//tbody//tr[{}]", index + 1);
 
-    sleep(Duration::from_millis(60000)).await;
+            let name_xpath = format!("{}//div[contains(concat(' ',@class,' '),' AssetPropertiesForm--name-input ')]//input", xpath);
+            let property_name_input = driver.find_element(By::XPath(name_xpath.as_str())).await?;
+            property_name_input.send_keys(package_config.properties[index].clone()).await?;
+
+            let property_xpath = format!("{}//div[contains(concat(' ',@class,' '),' AssetPropertiesForm--value-input ')]//input", xpath);
+            let property_value_input = driver.find_element(By::XPath(property_xpath.as_str())).await?;
+            property_value_input.send_keys(property).await?;
+
+            if index + 1 < package_config.properties.len() {
+                let add_more_button = driver.find_element(By::XPath("//button[contains(text(), 'Add more')]")).await?;
+                add_more_button.click().await?;
+            }
+        }
+        let save_properties_button = driver.find_element(By::XPath("//button[contains(text(), 'Save')]")).await?;
+        save_properties_button.click().await?;
+
+        // create nft
+        let create_button = driver.find_element(By::XPath("//button[contains(text(), 'Create')]")).await?;
+        create_button.click().await?;
+
+        // add another nft
+        driver.get("https://opensea.io/collections").await?;
+
+        // select collection
+        let xpath = format!("//main//section//div[contains(text(), '{}')]", package_config.name);
+        let collection_name = driver.find_element(By::XPath(xpath.as_str())).await?;
+        collection_name.click().await?;
+
+        // add item
+        let add_item = driver.find_element(By::XPath("//main//a[contains(text(), 'Add item')]")).await?;
+        add_item.click().await?;
+    }
 
     WebDriverResult::Ok(())
 }
@@ -148,6 +185,9 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         format!("http://{}", selenium_host).as_str(),
         &caps
     ).await.unwrap();
+
+    // set implicit to 10 seconds; default is 0
+    driver.set_implicit_wait_timeout(Duration::new(10, 0)).await.unwrap();
 
     if let Err(e) = install_metamask(
         &driver,
