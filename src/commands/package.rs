@@ -147,7 +147,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         }
     }
 
-    if order == "rarest" {
+    if order == "probability" {
         package_config.images.sort_by(|a, b| a.probability.partial_cmp(b.probability.borrow()).unwrap());
         fs::create_dir(image_temp_dest.clone()).unwrap();
         for (index, image) in package_config.images.iter_mut().enumerate() {

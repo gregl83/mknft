@@ -18,7 +18,7 @@ use commands::publish;
 arg_enum! {
     #[derive(PartialEq, Debug)]
     pub enum Order {
-        Rarest,
+        Probability,
         Random
     }
 }
