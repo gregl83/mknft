@@ -63,6 +63,8 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
     let metamask_item = driver.find_element(By::XPath("//main//li//button//div//span[contains(text(), 'MetaMask')]")).await?;
     metamask_item.click().await?;
 
+    sleep(Duration::from_millis(1000)).await;
+
     // select metamask connect window
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[2]).await?;
@@ -102,8 +104,7 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[0]).await?;
 
-    let total_images = package_config.images.len().clone();
-    for image in package_config.images {
+    for image in package_config.images.iter() {
         // upload image
         let media_input = driver.find_element(By::XPath("//input[contains(@id, 'media')]")).await?;
         media_input.send_keys(format!("/home/seluser/{}", image.path)).await?;
@@ -111,15 +112,15 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
         // set name
         let name = format!("{} #{}", package_config.name, image.name);
         let name_input = driver.find_element(By::XPath("//input[contains(@id, 'name')]")).await?;
-        name_input.send_keys(name).await?;
+        name_input.send_keys(name.clone()).await?;
 
         // set description
-        let description = format!("**#{}**<br><br>{} nft collection", image.name, package_config.name);
+        let description = format!("**#{}** - {} nft collection", image.name, package_config.name);
         let description_input = driver.find_element(By::XPath("//textarea[contains(@id, 'description')]")).await?;
         description_input.send_keys(description).await?;
 
         // set external link
-        if let Some(image_uri) = image.uri {
+        if let Some(image_uri) = image.uri.clone() {
             let link_input = driver.find_element(By::XPath("//input[contains(@id, 'external_link')]")).await?;
             link_input.send_keys(image_uri).await?;
         }
@@ -146,28 +147,12 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
         let save_properties_button = driver.find_element(By::XPath("//button[contains(text(), 'Save')]")).await?;
         save_properties_button.click().await?;
 
-        // add stats
-        let stats_button = driver.find_element(By::XPath("//button[contains(@aria-label, 'Add stats')]")).await?;
-        stats_button.click().await?;
-
-        let stat_name_input = driver.find_element(By::XPath("//tbody//tr[0]//div[contains(concat(' ',@class,' '),' NumericTraitTableRow--name-input ')]//input")).await?;
-        stat_name_input.send_keys("Rank").await?;
-
-        let stat_value_input = driver.find_element(By::XPath("//tbody//tr[0]////div[contains(concat(' ',@class,' '),' NumericTraitTableRow--value-input ')]//input")).await?;
-        stat_value_input.send_keys(image.name.clone()).await?;
-
-        let stat_max_value_input = driver.find_element(By::XPath("//tbody//tr[0]////div[contains(concat(' ',@class,' '),' NumericTraitTableRow--value-input ')]//input")).await?;
-        stat_max_value_input.send_keys(format!("{}", total_images)).await?;
-
-        let save_stats_button = driver.find_element(By::XPath("//button[contains(text(), 'Save')]")).await?;
-        save_stats_button.click().await?;
-
         // create nft
         let create_button = driver.find_element(By::XPath("//button[contains(text(), 'Create')]")).await?;
         create_button.click().await?;
 
         // verify complete
-        let expected_completion_message = format!("//h4[contains(text(), 'You created {}!')]", image.name);
+        let expected_completion_message = format!("//h4[contains(text(), 'You created {}!')]", name.clone());
         let completion_message = driver.find_element(By::XPath(expected_completion_message.as_str())).await?;
         completion_message.wait_until().displayed().await?;
 
@@ -211,7 +196,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     ).await.unwrap();
 
     // set implicit to 10 seconds; default is 0
-    driver.set_implicit_wait_timeout(Duration::new(10, 0)).await.unwrap();
+    driver.set_implicit_wait_timeout(Duration::new(60, 0)).await.unwrap();
 
     if let Err(e) = install_metamask(
         &driver,
