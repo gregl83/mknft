@@ -102,18 +102,21 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[0]).await?;
 
+    let total_images = package_config.images.len().clone();
     for image in package_config.images {
         // upload image
         let media_input = driver.find_element(By::XPath("//input[contains(@id, 'media')]")).await?;
         media_input.send_keys(format!("/home/seluser/{}", image.path)).await?;
 
         // set name
+        let name = format!("{} #{}", package_config.name, image.name);
         let name_input = driver.find_element(By::XPath("//input[contains(@id, 'name')]")).await?;
-        name_input.send_keys(image.name).await?;
+        name_input.send_keys(name).await?;
 
         // set description
-        // let description_input = driver.find_element(By::XPath("//input[contains(@id, 'description')]")).await?;
-        // description_input.send_keys("name").await?;
+        let description = format!("**#{}**<br><br>{} nft collection", image.name, package_config.name);
+        let description_input = driver.find_element(By::XPath("//textarea[contains(@id, 'description')]")).await?;
+        description_input.send_keys(description).await?;
 
         // set external link
         if let Some(image_uri) = image.uri {
@@ -142,6 +145,22 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
         }
         let save_properties_button = driver.find_element(By::XPath("//button[contains(text(), 'Save')]")).await?;
         save_properties_button.click().await?;
+
+        // add stats
+        let stats_button = driver.find_element(By::XPath("//button[contains(@aria-label, 'Add stats')]")).await?;
+        stats_button.click().await?;
+
+        let stat_name_input = driver.find_element(By::XPath("//tbody//tr[0]//div[contains(concat(' ',@class,' '),' NumericTraitTableRow--name-input ')]//input")).await?;
+        stat_name_input.send_keys("Rank").await?;
+
+        let stat_value_input = driver.find_element(By::XPath("//tbody//tr[0]////div[contains(concat(' ',@class,' '),' NumericTraitTableRow--value-input ')]//input")).await?;
+        stat_value_input.send_keys(image.name.clone()).await?;
+
+        let stat_max_value_input = driver.find_element(By::XPath("//tbody//tr[0]////div[contains(concat(' ',@class,' '),' NumericTraitTableRow--value-input ')]//input")).await?;
+        stat_max_value_input.send_keys(format!("{}", total_images)).await?;
+
+        let save_stats_button = driver.find_element(By::XPath("//button[contains(text(), 'Save')]")).await?;
+        save_stats_button.click().await?;
 
         // create nft
         let create_button = driver.find_element(By::XPath("//button[contains(text(), 'Create')]")).await?;
