@@ -98,7 +98,7 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
     let collection_asset_create_uri = format!("https://opensea.io/collection/{}/assets/create", package_config.id);
     for image in package_config.images.iter() {
         // create asset
-        driver.get(collection_asset_create_uri.as_str()).await?; // fixme
+        driver.get(collection_asset_create_uri.as_str()).await?;
         sleep(Duration::from_millis(2000)).await;
 
         // upload image
