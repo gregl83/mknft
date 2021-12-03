@@ -40,6 +40,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let project_config: ProjectConfig = serde_json::from_reader(file).unwrap();
 
     let mut package_config = PackageConfig {
+        id: project_config.id,
         name: project_config.name,
         properties: vec![],
         images: vec![]

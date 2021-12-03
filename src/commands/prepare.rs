@@ -26,6 +26,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let mut project_config = match config_file {
         Ok(file) => serde_json::from_reader(file).unwrap(),
         _ => ProjectConfig {
+            id: String::from(name),
             name: String::from(name),
             uri: None,
             attributes: vec![]

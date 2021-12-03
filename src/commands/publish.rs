@@ -56,55 +56,51 @@ async fn install_metamask(
 }
 
 async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: PackageConfig) -> WebDriverResult<()> {
-    // go to OpenSea NFT marketplace login page (referrer collections)
-    driver.get("https://opensea.io/login?referrer=%2Fcollections").await?;
+    // go to OpenSea NFT marketplace login page
+    driver.get("https://opensea.io/login").await?;
 
     // connect compatible wallet
     let metamask_item = driver.find_element(By::XPath("//main//li//button//div//span[contains(text(), 'MetaMask')]")).await?;
     metamask_item.click().await?;
 
-    sleep(Duration::from_millis(1000)).await;
+    sleep(Duration::from_millis(5000)).await;
 
     // select metamask connect window
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[2]).await?;
-
     // connect metamask wallet
     let next_button = driver.find_element(By::XPath("//button[contains(text(), 'Next')]")).await?;
     next_button.click().await?;
-
     // connect metamask account
     let connect_button = driver.find_element(By::XPath("//button[contains(text(), 'Connect')]")).await?;
     connect_button.click().await?;
+    sleep(Duration::from_millis(5000)).await;
 
     // select main tab
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[0]).await?;
 
-    // select collection
-    let xpath = format!("//main//section//div[contains(text(), '{}')]", package_config.name);
-    let collection_name = driver.find_element(By::XPath(xpath.as_str())).await?;
-    collection_name.click().await?;
+    // go to create asset to sign request
+    driver.get("https://opensea.io/asset/create").await?;
+    sleep(Duration::from_millis(5000)).await;
 
-    // add item
-    let add_item = driver.find_element(By::XPath("//main//a[contains(text(), 'Add item')]")).await?;
-    add_item.click().await?;
-
-    sleep(Duration::from_millis(1000)).await;
-
-    // select metamask tab
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[2]).await?;
 
-    // sign
     let sign = driver.find_element(By::XPath("//button[contains(text(), 'Sign')]")).await?;
     sign.click().await?;
+    sleep(Duration::from_millis(5000)).await;
 
     // select main tab
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[0]).await?;
 
+    let collection_asset_create_uri = format!("https://opensea.io/collection/{}/assets/create", package_config.id);
     for image in package_config.images.iter() {
+        // create asset
+        driver.get(collection_asset_create_uri.as_str()).await?; // fixme
+        sleep(Duration::from_millis(2000)).await;
+
         // upload image
         let media_input = driver.find_element(By::XPath("//input[contains(@id, 'media')]")).await?;
         media_input.send_keys(format!("/home/seluser/{}", image.path)).await?;
@@ -115,7 +111,7 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
         name_input.send_keys(name.clone()).await?;
 
         // set description
-        let description = format!("**#{}** - {} nft collection", image.name, package_config.name);
+        let description = format!("**#{}** - {} collection", image.name, package_config.name);
         let description_input = driver.find_element(By::XPath("//textarea[contains(@id, 'description')]")).await?;
         description_input.send_keys(description).await?;
 
@@ -147,7 +143,7 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
         let save_properties_button = driver.find_element(By::XPath("//button[contains(text(), 'Save')]")).await?;
         save_properties_button.click().await?;
 
-        // create nft
+        // create/mint nft
         let create_button = driver.find_element(By::XPath("//button[contains(text(), 'Create')]")).await?;
         create_button.click().await?;
 
@@ -155,18 +151,6 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
         let expected_completion_message = format!("//h4[contains(text(), 'You created {}!')]", name.clone());
         let completion_message = driver.find_element(By::XPath(expected_completion_message.as_str())).await?;
         completion_message.wait_until().displayed().await?;
-
-        // add another nft
-        driver.get("https://opensea.io/collections").await?;
-
-        // select collection
-        let xpath = format!("//main//section//div[contains(text(), '{}')]", package_config.name);
-        let collection_name = driver.find_element(By::XPath(xpath.as_str())).await?;
-        collection_name.click().await?;
-
-        // add item
-        let add_item = driver.find_element(By::XPath("//main//a[contains(text(), 'Add item')]")).await?;
-        add_item.click().await?;
     }
 
     WebDriverResult::Ok(())

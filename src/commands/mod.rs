@@ -31,6 +31,7 @@ pub struct Attribute {
 /// Project config used by `prepare` command
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct ProjectConfig {
+    id: String,
     name: String,
     uri: Option<String>,
     attributes: Vec<Attribute>
@@ -49,6 +50,7 @@ pub struct Image {
 /// Package config created using `package` command
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PackageConfig {
+    id: String,
     name: String,
     properties: Vec<String>,
     images: Vec<Image>
