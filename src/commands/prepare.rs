@@ -49,6 +49,10 @@ pub async fn exec(matches: &ArgMatches<'_>) {
 
         if let Some(layers) = psd.get_sub_layers(group_id - 1) {
             let group_name = psd.group_by_id(group_id - 1).unwrap().name();
+            let skip_group = Regex::new(r"^_.*").unwrap();
+            if skip_group.is_match(group_name) {
+                continue;
+            }
             let group_path = format!("{}/{}", dest, group_name);
 
             if !project_config.attributes.iter().any(|attribute| attribute.name == group_name) {
