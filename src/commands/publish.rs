@@ -55,7 +55,7 @@ async fn install_metamask(
     WebDriverResult::Ok(())
 }
 
-async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: PackageConfig) -> WebDriverResult<()> {
+async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: PackageConfig, start: usize, limit: usize) -> WebDriverResult<()> {
     // go to OpenSea NFT marketplace login page
     driver.get("https://opensea.io/login").await?;
 
@@ -96,7 +96,8 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
     driver.switch_to().window(&windows[0]).await?;
 
     let collection_asset_create_uri = format!("https://opensea.io/collection/{}/assets/create", package_config.id);
-    for image in package_config.images.iter() {
+    let images = &package_config.images[start..limit];
+    for image in images {
         // create asset
         driver.get(collection_asset_create_uri.as_str()).await?;
         sleep(Duration::from_millis(2000)).await;
@@ -161,6 +162,12 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let selenium_host = matches.value_of("host").unwrap();
     let metamask_crx = matches.value_of("crx").unwrap();
     let metamask_phrase = matches.value_of("phrase").unwrap();
+
+    let start_arg = matches.value_of("start").unwrap();
+    let start = start_arg.parse::<usize>().unwrap();
+    let limit_arg = matches.value_of("limit").unwrap();
+    let limit = limit_arg.parse::<usize>().unwrap();
+
     let metamask_password: String = thread_rng()
         .sample_iter(&Alphanumeric)
         .take(30)
@@ -189,7 +196,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     ).await {
         println!("MetaMask installation error! {:?}", e);
     } else {
-        match publish(&driver, package_config).await {
+        match publish(&driver, package_config, start, limit).await {
             Ok(_) => println!("done!"),
             Err(e) => println!("Publish error! {:?}", e),
         }
