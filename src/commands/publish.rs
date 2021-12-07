@@ -55,7 +55,13 @@ async fn install_metamask(
     WebDriverResult::Ok(())
 }
 
-async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: PackageConfig, start: usize, limit: usize) -> WebDriverResult<()> {
+async fn publish(
+    driver: &GenericWebDriver<ReqwestDriverAsync>,
+    package_config: PackageConfig,
+    start: usize,
+    end: usize,
+    wait: u64
+) -> WebDriverResult<()> {
     // go to OpenSea NFT marketplace login page
     driver.get("https://opensea.io/login").await?;
 
@@ -96,62 +102,72 @@ async fn publish(driver: &GenericWebDriver<ReqwestDriverAsync>, package_config: 
     driver.switch_to().window(&windows[0]).await?;
 
     let collection_asset_create_uri = format!("https://opensea.io/collection/{}/assets/create", package_config.id);
-    let images = &package_config.images[start..limit];
-    for image in images {
-        // create asset
-        driver.get(collection_asset_create_uri.as_str()).await?;
-        sleep(Duration::from_millis(2000)).await;
 
-        // upload image
-        let media_input = driver.find_element(By::XPath("//input[contains(@id, 'media')]")).await?;
-        media_input.send_keys(format!("/home/seluser/{}", image.path)).await?;
+    let image_chunks = package_config.images[start..end].chunks(10);
+    for images in image_chunks {
+        for image in images {
+            println!("creating {:?}", image.name.clone());
 
-        // set name
-        let name = format!("{} #{}", package_config.name, image.name);
-        let name_input = driver.find_element(By::XPath("//input[contains(@id, 'name')]")).await?;
-        name_input.send_keys(name.clone()).await?;
+            // create asset
+            driver.get(collection_asset_create_uri.as_str()).await?;
+            sleep(Duration::from_millis(2000)).await;
 
-        // set description
-        let description = format!("**#{}** - {} collection", image.name, package_config.name);
-        let description_input = driver.find_element(By::XPath("//textarea[contains(@id, 'description')]")).await?;
-        description_input.send_keys(description).await?;
+            // upload image
+            let media_input = driver.find_element(By::XPath("//input[contains(@id, 'media')]")).await?;
+            media_input.send_keys(format!("/home/seluser/{}", image.path)).await?;
 
-        // set external link
-        if let Some(image_uri) = image.uri.clone() {
-            let link_input = driver.find_element(By::XPath("//input[contains(@id, 'external_link')]")).await?;
-            link_input.send_keys(image_uri).await?;
-        }
+            // set name
+            let name = format!("{} #{}", package_config.name, image.name);
+            let name_input = driver.find_element(By::XPath("//input[contains(@id, 'name')]")).await?;
+            name_input.send_keys(name.clone()).await?;
 
-        // add properties
-        let property_button = driver.find_element(By::XPath("//button[contains(@aria-label, 'Add properties')]")).await?;
-        property_button.click().await?;
-        for (index, property) in image.properties.iter().enumerate() {
-            let xpath = format!("//tbody//tr[{}]", index + 1);
+            // set description
+            let description = format!("**#{}** - {} collection", image.name, package_config.name);
+            let description_input = driver.find_element(By::XPath("//textarea[contains(@id, 'description')]")).await?;
+            description_input.send_keys(description).await?;
 
-            let name_xpath = format!("{}//div[contains(concat(' ',@class,' '),' AssetPropertiesForm--name-input ')]//input", xpath);
-            let property_name_input = driver.find_element(By::XPath(name_xpath.as_str())).await?;
-            property_name_input.send_keys(package_config.properties[index].clone()).await?;
-
-            let property_xpath = format!("{}//div[contains(concat(' ',@class,' '),' AssetPropertiesForm--value-input ')]//input", xpath);
-            let property_value_input = driver.find_element(By::XPath(property_xpath.as_str())).await?;
-            property_value_input.send_keys(property).await?;
-
-            if index + 1 < package_config.properties.len() {
-                let add_more_button = driver.find_element(By::XPath("//button[contains(text(), 'Add more')]")).await?;
-                add_more_button.click().await?;
+            // set external link
+            if let Some(image_uri) = image.uri.clone() {
+                let link_input = driver.find_element(By::XPath("//input[contains(@id, 'external_link')]")).await?;
+                link_input.send_keys(image_uri).await?;
             }
+
+            // add properties
+            let property_button = driver.find_element(By::XPath("//button[contains(@aria-label, 'Add properties')]")).await?;
+            property_button.click().await?;
+            for (index, property) in image.properties.iter().enumerate() {
+                let xpath = format!("//tbody//tr[{}]", index + 1);
+
+                let name_xpath = format!("{}//div[contains(concat(' ',@class,' '),' AssetPropertiesForm--name-input ')]//input", xpath);
+                let property_name_input = driver.find_element(By::XPath(name_xpath.as_str())).await?;
+                property_name_input.send_keys(package_config.properties[index].clone()).await?;
+
+                let property_xpath = format!("{}//div[contains(concat(' ',@class,' '),' AssetPropertiesForm--value-input ')]//input", xpath);
+                let property_value_input = driver.find_element(By::XPath(property_xpath.as_str())).await?;
+                property_value_input.send_keys(property).await?;
+
+                if index + 1 < package_config.properties.len() {
+                    let add_more_button = driver.find_element(By::XPath("//button[contains(text(), 'Add more')]")).await?;
+                    add_more_button.click().await?;
+                }
+            }
+            let save_properties_button = driver.find_element(By::XPath("//button[contains(text(), 'Save')]")).await?;
+            save_properties_button.click().await?;
+
+            // create/mint nft
+            let create_button = driver.find_element(By::XPath("//button[contains(text(), 'Create')]")).await?;
+            create_button.click().await?;
+
+            // verify complete
+            let expected_completion_message = format!("//h4[contains(text(), 'You created {}!')]", name.clone());
+            let completion_message = driver.find_element(By::XPath(expected_completion_message.as_str())).await?;
+            completion_message.wait_until().displayed().await?;
+
+            println!("completed {:?}", image.name.clone());
         }
-        let save_properties_button = driver.find_element(By::XPath("//button[contains(text(), 'Save')]")).await?;
-        save_properties_button.click().await?;
 
-        // create/mint nft
-        let create_button = driver.find_element(By::XPath("//button[contains(text(), 'Create')]")).await?;
-        create_button.click().await?;
-
-        // verify complete
-        let expected_completion_message = format!("//h4[contains(text(), 'You created {}!')]", name.clone());
-        let completion_message = driver.find_element(By::XPath(expected_completion_message.as_str())).await?;
-        completion_message.wait_until().displayed().await?;
+        println!("waiting {:?} seconds", wait);
+        sleep(Duration::from_secs(wait)).await;
     }
 
     WebDriverResult::Ok(())
@@ -165,8 +181,10 @@ pub async fn exec(matches: &ArgMatches<'_>) {
 
     let start_arg = matches.value_of("start").unwrap();
     let start = start_arg.parse::<usize>().unwrap();
-    let limit_arg = matches.value_of("limit").unwrap();
-    let limit = limit_arg.parse::<usize>().unwrap();
+    let end_arg = matches.value_of("end").unwrap();
+    let end = end_arg.parse::<usize>().unwrap();
+    let wait_arg = matches.value_of("wait").unwrap();
+    let wait = wait_arg.parse::<u64>().unwrap();
 
     let metamask_password: String = thread_rng()
         .sample_iter(&Alphanumeric)
@@ -196,7 +214,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     ).await {
         println!("MetaMask installation error! {:?}", e);
     } else {
-        match publish(&driver, package_config, start, limit).await {
+        match publish(&driver, package_config, start, end, wait).await {
             Ok(_) => println!("done!"),
             Err(e) => println!("Publish error! {:?}", e),
         }
