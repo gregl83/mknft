@@ -103,8 +103,8 @@ async fn publish(
 
     let collection_asset_create_uri = format!("https://opensea.io/collection/{}/assets/create", package_config.id);
 
-    let image_chunks = package_config.images[start..end].chunks(10);
-    for images in image_chunks {
+    let mut image_chunks = package_config.images[start..end].chunks(10).peekable();
+    while let Some(images) = image_chunks.next() {
         for image in images {
             println!("creating {:?}", image.name.clone());
 
@@ -165,9 +165,10 @@ async fn publish(
 
             println!("completed {:?}", image.name.clone());
         }
-
-        println!("waiting {:?} seconds", wait);
-        sleep(Duration::from_secs(wait)).await;
+        if image_chunks.peek().is_some() {
+            println!("waiting {:?} seconds", wait);
+            sleep(Duration::from_secs(wait)).await;
+        }
     }
 
     WebDriverResult::Ok(())
