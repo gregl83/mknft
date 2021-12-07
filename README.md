@@ -2,6 +2,12 @@
 
 Toolset for creating NFTs from Photoshop layer combinations.
 
+- Attributes using PSD layer group names
+- Combinations of layers from each groups
+- Layer names as attribute values
+- Weighted selection of layers from configuration file
+- Publish resulting images to OpenSea
+
 **IN DEVELOPMENT / TESTING**
 
 ## Usage
