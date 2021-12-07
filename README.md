@@ -1,6 +1,6 @@
 # mknft
 
-NFT toolset for Photoshop layer combinations.
+Toolset for creating NFTs from Photoshop layer combinations.
 
 **IN DEVELOPMENT / TESTING**
 
