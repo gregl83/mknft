@@ -1,8 +1,12 @@
 # mknft
 
-Create NFT Projects
+NFT toolset for Photoshop layer combinations.
 
-**IN DEVELOPMENT**
+**IN DEVELOPMENT / TESTING**
+
+## Usage
+
+// todo
 
 ## Real-World Example
 
