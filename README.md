@@ -19,6 +19,10 @@ Toolset for creating NFTs from Photoshop layer combinations.
 
 // todo
 
+## Installation
+
+// todo
+
 ## API
 
 // todo
