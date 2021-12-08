@@ -11,6 +11,10 @@ Toolset for creating NFTs from Photoshop layer combinations.
 
 **IN DEVELOPMENT / TESTING**
 
+## Requirements
+
+// todo
+
 ## Usage
 
 // todo
@@ -18,6 +22,12 @@ Toolset for creating NFTs from Photoshop layer combinations.
 ## API
 
 // todo
+
+## Example Project
+
+Included in this package is an [example project](example) that is comprised of a configuration JSON file and PSD with three layer groups.
+
+Run the `prepare` command and subsequently the `package` command to observe how `mknft` functions.
 
 ## Real-World Example
 
