@@ -1,17 +1,21 @@
 # mknft
 
-Toolset for creating NFTs from Photoshop layer combinations.
+Toolset to create NFTs from Photoshop layer group combinations.
 
-- Attributes using PSD layer group names
-- Combinations of layers from each groups
-- Layer names as attribute values
-- Weighted selection of layers from configuration file
-- Exclusion lists for layers that aren't compatible
+- Attributes are organized by PSD layer groups
+- Attribute values comprise of layers in each group
+- Combinations of attribute values, layers in group, for unique NFTs
+- Weighted selection of layers using configuration file
+- Exclusion lists prevent incompatible layers from being combined
+- PSD groups or layers can be ignored with *_* prefix
 - Publish composite images to OpenSea as NFTs
 
-**IN DEVELOPMENT / TESTING**
+**Status:** Beta Development
 
 ## Requirements
+
+- Photoshop PSD (layers in groups)
+- MetaMask Wallet (for publish command)
 
 // todo
 
