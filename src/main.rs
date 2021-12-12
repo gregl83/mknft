@@ -119,12 +119,19 @@ async fn main() {
                     .help("Wait duration (seconds) between chunks (10) to prevent rate limit errors")
                     .takes_value(true)
                     .case_insensitive(true)))
+        .subcommand(SubCommand::with_name("reconcile")
+            .about("Reconcile published NFT package for anomalies with OpenSea Collection")
+            .arg(Arg::with_name("src")
+                .help("Package directory")
+                .required(true)
+                .index(1)))
         .get_matches();
 
     match matches.subcommand() {
         ("prepare", Some(matches)) => prepare::exec(matches).await,
         ("package", Some(matches)) => package::exec(matches).await,
         ("publish", Some(matches)) => publish::exec(matches).await,
+        ("reconcile", Some(matches)) => publish::exec(matches).await,
         _ => {}
     }
 }
