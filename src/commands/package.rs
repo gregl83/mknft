@@ -11,11 +11,13 @@ use image::{GenericImageView, DynamicImage};
 use image::ImageBuffer;
 use image::Rgba;
 use serde_json;
-use inflector::cases::titlecase::to_title_case;
 
-use crate::commands::Image;
-use crate::commands::ProjectConfig;
-use crate::commands::PackageConfig;
+use crate::commands::{
+    Image,
+    ProjectConfig,
+    PackageConfig,
+    attribute_name_format
+};
 
 // function to combine two layers of psd
 fn combine_layers(source : &DynamicImage, target: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
@@ -69,7 +71,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             WeightedIndex::new(index).unwrap()
         ));
         package_config.properties.push(
-            to_title_case(attribute.name.as_str())
+            attribute_name_format(attribute.name.as_str())
         );
     }
 
@@ -114,7 +116,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             let image = images.get(image_index).unwrap();
             combine_layers(&image, &mut target);
             package_image.properties.push(
-                to_title_case(image_config.name.as_str())
+                attribute_name_format(image_config.name.as_str())
             );
             package_image.probability = package_image.probability.mul(image_config.probability.unwrap());
         }

@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use tokio::time::{sleep, Duration};
 use thirtyfour::GenericWebDriver;
 use thirtyfour::http::reqwest_async::ReqwestDriverAsync;
@@ -50,7 +51,7 @@ pub async fn install_extension(
     WebDriverResult::Ok(())
 }
 
-pub async fn login() -> WebDriverResult<()> {
+pub async fn login(driver: &GenericWebDriver<ReqwestDriverAsync>) -> WebDriverResult<()> {
     // go to OpenSea NFT marketplace login page
     driver.get("https://opensea.io/login").await?;
 
@@ -178,8 +179,12 @@ pub async fn unpublish(
     package_config: PackageConfig,
     start: usize,
     end: usize,
-    wait: u64
+    wait: u64,
+    filters: HashMap<usize, Vec<String>>
 ) -> WebDriverResult<()> {
+
+    print!("{:?}", filters);
+
     // go to create asset to sign request
     driver.get("https://opensea.io/asset/create").await?;
     sleep(Duration::from_millis(5000)).await;
@@ -188,6 +193,15 @@ pub async fn unpublish(
     // - config has, site missing
     // - config has, site has duplicate
     // - site has, config missing (solve?)
+
+    // https://opensea.io/collection/nfshibes
+    // ?search[query]=nfshibes%20%2310
+    // &search[sortAscending]=true
+    // &search[sortBy]=CREATED_DATE
+    // &search[stringTraits][0][name]=Eyewear
+    // &search[stringTraits][0][values][0]=Light%20Green%20Eyes
+    // &search[stringTraits][1][name]=Facemasks
+    // &search[stringTraits][1][values][0]=Batman
 
 
     let windows = driver.window_handles().await?;
@@ -206,7 +220,19 @@ pub async fn unpublish(
     let mut image_chunks = package_config.images[start..end].chunks(10).peekable();
     while let Some(images) = image_chunks.next() {
         for image in images {
+            let mut filtered = true;
+            for (property_index, filter) in filters.iter() {
+                filtered = filter.contains(&image.properties[*property_index]);
+            }
+            if !filtered {
+                continue;
+            }
+
             println!("creating {:?}", image.name.clone());
+
+            println!("{:?}", image.properties);
+
+            return WebDriverResult::Ok(());
 
             // create asset
             driver.get(collection_asset_create_uri.as_str()).await?;

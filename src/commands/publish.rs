@@ -49,7 +49,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         metamask_phrase,
         metamask_password.as_str()
     ).await.unwrap();
-    metamask::login().await.unwrap();
+    metamask::login(&driver).await.unwrap();
 
     metamask::publish(&driver, package_config, start, end, wait).await.unwrap();
 

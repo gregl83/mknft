@@ -5,6 +5,7 @@ pub mod unpublish;
 pub mod reconcile;
 
 use serde::{Deserialize, Serialize};
+use inflector::cases::titlecase::to_title_case;
 
 /// Config exclude Attribute or AttributeValue by name
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -56,4 +57,8 @@ pub struct PackageConfig {
     pub name: String,
     pub properties: Vec<String>,
     pub images: Vec<Image>
+}
+
+pub fn attribute_name_format(attribute_name: &str) -> String {
+    to_title_case(attribute_name)
 }

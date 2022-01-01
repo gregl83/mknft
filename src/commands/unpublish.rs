@@ -1,4 +1,6 @@
+use std::collections::HashMap;
 use std::fs;
+use std::ops::Deref;
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use clap::{ArgMatches};
@@ -7,7 +9,10 @@ use thirtyfour::http::reqwest_async::ReqwestDriverAsync;
 use thirtyfour::prelude::*;
 use tokio::time::{sleep, Duration};
 
-use crate::commands::PackageConfig;
+use crate::commands::{
+    PackageConfig,
+    attribute_name_format
+};
 use crate::adapters::metamask;
 
 pub async fn exec(matches: &ArgMatches<'_>) {
@@ -23,6 +28,8 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let wait_arg = matches.value_of("wait").unwrap();
     let wait = wait_arg.parse::<u64>().unwrap();
 
+    let filters: Vec<&str> = matches.values_of("filter").unwrap().collect();
+
     let metamask_password: String = thread_rng()
         .sample_iter(&Alphanumeric)
         .take(30)
@@ -31,6 +38,23 @@ pub async fn exec(matches: &ArgMatches<'_>) {
 
     let file = fs::File::open(format!("{}/config.json", src)).expect("file should open read only");
     let package_config: PackageConfig = serde_json::from_reader(file).unwrap();
+
+
+    let mut filters_map: HashMap<usize, Vec<String>> = HashMap::new();
+    for filter in filters {
+        let filter_parts: Vec<&str> = filter.split("=").collect();
+        let attribute = attribute_name_format(filter_parts[0]);
+        let attribute_value = attribute_name_format(filter_parts[1]);
+
+        if let property_index = package_config.properties.iter().position(
+            |property| property.as_str() == attribute.as_str()
+        ).unwrap() {
+            let attribute_map = filters_map.entry(property_index).or_insert_with(|| vec![]);
+            if !attribute_map.contains(&attribute_value) {
+                attribute_map.push(attribute_value);
+            }
+        }
+    }
 
     let mut caps = DesiredCapabilities::chrome();
 
@@ -49,9 +73,9 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         metamask_phrase,
         metamask_password.as_str()
     ).await.unwrap();
-    metamask::login().await.unwrap();
+    metamask::login(&driver).await.unwrap();
 
-    metamask::unpublish(&driver, package_config, start, end, wait).await.unwrap();
+    metamask::unpublish(&driver, package_config, start, end, wait, filters_map).await.unwrap();
 
     println!("done");
 
