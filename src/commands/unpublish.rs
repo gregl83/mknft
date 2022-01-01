@@ -44,23 +44,16 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     // set implicit to 10 seconds; default is 0
     driver.set_implicit_wait_timeout(Duration::new(60, 0)).await.unwrap();
 
-    // todo loop configuration looking for for mismatch:
-    // - config has, site missing
-    // - config has, site has duplicate
-    // - site has, config missing (solve?)
-
-    if let Err(e) = metamask::install_extension(
+    metamask::install_extension(
         &driver,
         metamask_phrase,
         metamask_password.as_str()
-    ).await {
-        println!("MetaMask installation error! {:?}", e);
-    } else {
-        match metamask::unpublish(&driver, package_config, start, end, wait).await {
-            Ok(_) => println!("done!"),
-            Err(e) => println!("Publish error! {:?}", e),
-        }
-    }
+    ).await.unwrap();
+    metamask::login().await.unwrap();
+
+    metamask::unpublish(&driver, package_config, start, end, wait).await.unwrap();
+
+    println!("done");
 
     // cleanup driver connection to selenium chrome
     driver.quit().await.unwrap();

@@ -50,13 +50,7 @@ pub async fn install_extension(
     WebDriverResult::Ok(())
 }
 
-pub async fn publish(
-    driver: &GenericWebDriver<ReqwestDriverAsync>,
-    package_config: PackageConfig,
-    start: usize,
-    end: usize,
-    wait: u64
-) -> WebDriverResult<()> {
+pub async fn login() -> WebDriverResult<()> {
     // go to OpenSea NFT marketplace login page
     driver.get("https://opensea.io/login").await?;
 
@@ -81,6 +75,16 @@ pub async fn publish(
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[0]).await?;
 
+    WebDriverResult::Ok(())
+}
+
+pub async fn publish(
+    driver: &GenericWebDriver<ReqwestDriverAsync>,
+    package_config: PackageConfig,
+    start: usize,
+    end: usize,
+    wait: u64
+) -> WebDriverResult<()> {
     // go to create asset to sign request
     driver.get("https://opensea.io/asset/create").await?;
     sleep(Duration::from_millis(5000)).await;
@@ -176,33 +180,15 @@ pub async fn unpublish(
     end: usize,
     wait: u64
 ) -> WebDriverResult<()> {
-    // go to OpenSea NFT marketplace login page
-    driver.get("https://opensea.io/login").await?;
-
-    // connect compatible wallet
-    let metamask_item = driver.find_element(By::XPath("//main//li//button//div//span[contains(text(), 'MetaMask')]")).await?;
-    metamask_item.click().await?;
-
-    sleep(Duration::from_millis(5000)).await;
-
-    // select metamask connect window
-    let windows = driver.window_handles().await?;
-    driver.switch_to().window(&windows[2]).await?;
-    // connect metamask wallet
-    let next_button = driver.find_element(By::XPath("//button[contains(text(), 'Next')]")).await?;
-    next_button.click().await?;
-    // connect metamask account
-    let connect_button = driver.find_element(By::XPath("//button[contains(text(), 'Connect')]")).await?;
-    connect_button.click().await?;
-    sleep(Duration::from_millis(5000)).await;
-
-    // select main tab
-    let windows = driver.window_handles().await?;
-    driver.switch_to().window(&windows[0]).await?;
-
     // go to create asset to sign request
     driver.get("https://opensea.io/asset/create").await?;
     sleep(Duration::from_millis(5000)).await;
+
+    // todo loop configuration looking for for mismatch:
+    // - config has, site missing
+    // - config has, site has duplicate
+    // - site has, config missing (solve?)
+
 
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[2]).await?;
