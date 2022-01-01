@@ -14,6 +14,8 @@ use clap::{SubCommand, Arg, App, arg_enum};
 use commands::prepare;
 use commands::package;
 use commands::publish;
+use commands::unpublish;
+use commands::reconcile;
 
 arg_enum! {
     #[derive(PartialEq, Debug)]
@@ -121,6 +123,12 @@ async fn main() {
                     .case_insensitive(true)))
         .subcommand(SubCommand::with_name("reconcile")
             .about("Reconcile published NFT package for anomalies with OpenSea Collection")
+            .arg(Arg::with_name("src")
+                .help("Package directory")
+                .required(true)
+                .index(1)))
+        .subcommand(SubCommand::with_name("unpublish")
+            .about("Unpublish NFT package from OpenSea Collection")
             .arg(Arg::with_name("src")
                 .help("Package directory")
                 .required(true)

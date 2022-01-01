@@ -1,6 +1,8 @@
 pub mod prepare;
 pub mod package;
 pub mod publish;
+pub mod unpublish;
+pub mod reconcile;
 
 use serde::{Deserialize, Serialize};
 
