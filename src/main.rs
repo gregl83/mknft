@@ -7,15 +7,10 @@
 //! ```
 
 mod commands;
+mod adapters;
 
 use tokio;
 use clap::{SubCommand, Arg, App, arg_enum};
-
-use commands::prepare;
-use commands::package;
-use commands::publish;
-use commands::unpublish;
-use commands::reconcile;
 
 arg_enum! {
     #[derive(PartialEq, Debug)]
@@ -122,7 +117,7 @@ async fn main() {
                     .takes_value(true)
                     .case_insensitive(true)))
         .subcommand(SubCommand::with_name("reconcile")
-            .about("Reconcile published NFT package for anomalies with OpenSea Collection")
+            .about("Reconcile NFT package from OpenSea Collection")
             .arg(Arg::with_name("src")
                 .help("Package directory")
                 .required(true)
@@ -136,10 +131,11 @@ async fn main() {
         .get_matches();
 
     match matches.subcommand() {
-        ("prepare", Some(matches)) => prepare::exec(matches).await,
-        ("package", Some(matches)) => package::exec(matches).await,
-        ("publish", Some(matches)) => publish::exec(matches).await,
-        ("reconcile", Some(matches)) => publish::exec(matches).await,
+        ("prepare", Some(matches)) => commands::prepare::exec(matches).await,
+        ("package", Some(matches)) => commands::package::exec(matches).await,
+        ("publish", Some(matches)) => commands::publish::exec(matches).await,
+        ("unpublish", Some(matches)) => commands::unpublish::exec(matches).await,
+        ("reconcile", Some(matches)) => commands::reconcile::exec(matches).await,
         _ => {}
     }
 }
