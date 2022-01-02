@@ -13,7 +13,8 @@ pub async fn publish(
     package_config: PackageConfig,
     start: usize,
     end: usize,
-    wait: u64
+    wait: u64,
+    filters: Vec<Vec<String>>
 ) -> WebDriverResult<()> {
     // go to create asset to sign request
     driver.get("https://opensea.io/asset/create").await?;
@@ -34,6 +35,18 @@ pub async fn publish(
 
     let mut counter = 0;
     for image in package_config.images[start..end].iter() {
+        let mut filtered = true;
+        for (property_index, filters ) in filters.iter().enumerate() {
+            let attribute_value = &image.properties[property_index];
+            if !filters.is_empty() && !filters.contains(attribute_value) {
+                filtered = false;
+                break;
+            }
+        }
+        if !filtered {
+            continue;
+        }
+
         println!("creating {:?}", image.name.clone());
 
         // create asset

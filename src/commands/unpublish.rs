@@ -26,7 +26,6 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let end = end_arg.parse::<usize>().unwrap();
     let wait_arg = matches.value_of("wait").unwrap();
     let wait = wait_arg.parse::<u64>().unwrap();
-
     let filters: Vec<&str> = matches.values_of("filter").unwrap().collect();
 
     let metamask_password: String = thread_rng()

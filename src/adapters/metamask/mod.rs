@@ -8,8 +8,11 @@ use url::Url;
 
 use crate::commands::PackageConfig;
 
-pub mod publish;
-pub mod unpublish;
+mod publish;
+mod unpublish;
+
+pub use publish::publish;
+pub use unpublish::unpublish;
 
 pub async fn install_extension(
     driver: &GenericWebDriver<ReqwestDriverAsync>,

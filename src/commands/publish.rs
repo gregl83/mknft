@@ -22,6 +22,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let end = end_arg.parse::<usize>().unwrap();
     let wait_arg = matches.value_of("wait").unwrap();
     let wait = wait_arg.parse::<u64>().unwrap();
+    let filters: Vec<&str> = matches.values_of("filter").unwrap().collect();
 
     let metamask_password: String = thread_rng()
         .sample_iter(&Alphanumeric)
@@ -31,6 +32,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
 
     let file = fs::File::open(format!("{}/config.json", src)).expect("file should open read only");
     let package_config: PackageConfig = serde_json::from_reader(file).unwrap();
+    let property_filters = package_config.properties_filtered(filters);
 
     let mut caps = DesiredCapabilities::chrome();
 
@@ -51,7 +53,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     ).await.unwrap();
     metamask::login(&driver).await.unwrap();
 
-    metamask::publish(&driver, package_config, start, end, wait).await.unwrap();
+    metamask::publish(&driver, package_config, start, end, wait, property_filters).await.unwrap();
 
     println!("done");
 
