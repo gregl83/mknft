@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs;
 use std::ops::Deref;
 use rand::{thread_rng, Rng};
@@ -39,19 +38,16 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let file = fs::File::open(format!("{}/config.json", src)).expect("file should open read only");
     let package_config: PackageConfig = serde_json::from_reader(file).unwrap();
 
-
-    let mut filters_map: HashMap<usize, Vec<String>> = HashMap::new();
+    let mut property_filters: Vec<Vec<String>> = vec![vec![]; package_config.properties.len()];
     for filter in filters {
         let filter_parts: Vec<&str> = filter.split("=").collect();
         let attribute = attribute_name_format(filter_parts[0]);
         let attribute_value = attribute_name_format(filter_parts[1]);
-
         if let property_index = package_config.properties.iter().position(
             |property| property.as_str() == attribute.as_str()
         ).unwrap() {
-            let attribute_map = filters_map.entry(property_index).or_insert_with(|| vec![]);
-            if !attribute_map.contains(&attribute_value) {
-                attribute_map.push(attribute_value);
+            if !property_filters[property_index].contains(&attribute_value) {
+                property_filters[property_index].push(attribute_value);
             }
         }
     }
@@ -75,7 +71,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     ).await.unwrap();
     metamask::login(&driver).await.unwrap();
 
-    metamask::unpublish(&driver, package_config, start, end, wait, filters_map).await.unwrap();
+    metamask::unpublish(&driver, package_config, start, end, wait, property_filters).await.unwrap();
 
     println!("done");
 
