@@ -37,20 +37,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
 
     let file = fs::File::open(format!("{}/config.json", src)).expect("file should open read only");
     let package_config: PackageConfig = serde_json::from_reader(file).unwrap();
-
-    let mut property_filters: Vec<Vec<String>> = vec![vec![]; package_config.properties.len()];
-    for filter in filters {
-        let filter_parts: Vec<&str> = filter.split("=").collect();
-        let attribute = attribute_name_format(filter_parts[0]);
-        let attribute_value = attribute_name_format(filter_parts[1]);
-        if let property_index = package_config.properties.iter().position(
-            |property| property.as_str() == attribute.as_str()
-        ).unwrap() {
-            if !property_filters[property_index].contains(&attribute_value) {
-                property_filters[property_index].push(attribute_value);
-            }
-        }
-    }
+    let property_filters = package_config.properties_filtered(filters);
 
     let mut caps = DesiredCapabilities::chrome();
 

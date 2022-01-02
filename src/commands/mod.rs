@@ -59,6 +59,25 @@ pub struct PackageConfig {
     pub images: Vec<Image>
 }
 
+impl PackageConfig {
+    fn properties_filtered(&self, filters: Vec<&str>) -> Vec<Vec<String>> {
+        let mut property_filters: Vec<Vec<String>> = vec![vec![]; self.properties.len()];
+        for filter in filters {
+            let filter_parts: Vec<&str> = filter.split("=").collect();
+            let attribute = attribute_name_format(filter_parts[0]);
+            let attribute_value = attribute_name_format(filter_parts[1]);
+            if let property_index = self.properties.iter().position(
+                |property| property.as_str() == attribute.as_str()
+            ).unwrap() {
+                if !property_filters[property_index].contains(&attribute_value) {
+                    property_filters[property_index].push(attribute_value);
+                }
+            }
+        }
+        property_filters
+    }
+}
+
 pub fn attribute_name_format(attribute_name: &str) -> String {
     to_title_case(attribute_name)
 }
