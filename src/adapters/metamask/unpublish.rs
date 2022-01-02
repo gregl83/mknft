@@ -29,7 +29,7 @@ pub async fn unpublish(
     let windows = driver.window_handles().await?;
     driver.switch_to().window(&windows[0]).await?;
 
-    let collection_asset_create_uri = format!("https://opensea.io/collection/{}", package_config.id);
+    let collection_uri = format!("https://opensea.io/collection/{}", package_config.id);
 
     let mut counter = 0;
     for image in package_config.images[start..end].iter() {
@@ -55,7 +55,7 @@ pub async fn unpublish(
         println!("deleting {:?}", image.name.clone());
 
         let collection_asset_search_uri = Url::parse_with_params(
-            collection_asset_create_uri.as_str(),
+            collection_uri.as_str(),
             query_params
 
         ).unwrap();

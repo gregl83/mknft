@@ -5,9 +5,11 @@ use thirtyfour::prelude::*;
 
 mod publish;
 mod unpublish;
+mod reconcile;
 
 pub use publish::publish;
 pub use unpublish::unpublish;
+pub use reconcile::reconcile;
 
 pub async fn install_extension(
     driver: &GenericWebDriver<ReqwestDriverAsync>,
