@@ -1,17 +1,11 @@
 use std::fs;
-use std::ops::Deref;
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use clap::{ArgMatches};
-use thirtyfour::GenericWebDriver;
-use thirtyfour::http::reqwest_async::ReqwestDriverAsync;
 use thirtyfour::prelude::*;
-use tokio::time::{sleep, Duration};
+use tokio::time::Duration;
 
-use crate::commands::{
-    PackageConfig,
-    attribute_name_format
-};
+use crate::commands::PackageConfig;
 use crate::adapters::metamask;
 
 pub async fn exec(matches: &ArgMatches<'_>) {

@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-use std::fmt::format;
 use tokio::time::{sleep, Duration};
 use thirtyfour::GenericWebDriver;
 use thirtyfour::http::reqwest_async::ReqwestDriverAsync;

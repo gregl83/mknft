@@ -66,6 +66,20 @@ async fn main() {
                 .takes_value(true)
                 .possible_values(&Order::variants())
                 .case_insensitive(true)))
+        .subcommand(SubCommand::with_name("repackage")
+            .about("Repackage NFT package")
+            .arg(Arg::with_name("src_project")
+                .help("Project directory")
+                .required(true)
+                .index(1))
+            .arg(Arg::with_name("src_package")
+                .help("Package directory")
+                .required(true)
+                .index(2))
+            .arg(Arg::with_name("dest")
+                .help("Package directory")
+                .required(true)
+                .index(3)))
         .subcommand(SubCommand::with_name("publish")
             .about("Publish NFT package to OpenSea Collection")
             .arg(Arg::with_name("src")
@@ -245,6 +259,7 @@ async fn main() {
     match matches.subcommand() {
         ("prepare", Some(matches)) => commands::prepare::exec(matches).await,
         ("package", Some(matches)) => commands::package::exec(matches).await,
+        ("repackage", Some(matches)) => commands::repackage::exec(matches).await,
         ("publish", Some(matches)) => commands::publish::exec(matches).await,
         ("unpublish", Some(matches)) => commands::unpublish::exec(matches).await,
         ("reconcile", Some(matches)) => commands::reconcile::exec(matches).await,

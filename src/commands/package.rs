@@ -16,18 +16,9 @@ use crate::commands::{
     Image,
     ProjectConfig,
     PackageConfig,
-    attribute_name_format
+    attribute_name_format,
+    write_image
 };
-
-// function to combine two layers of psd
-fn combine_layers(source : &DynamicImage, target: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
-    for (x, y, source_pixel) in source.pixels() {
-        let mut target_pixel = target.get_pixel_mut(x, y);
-        if source_pixel.0[3] > 0 {
-            target_pixel.0 = source_pixel.0;
-        }
-    }
-}
 
 pub async fn exec(matches: &ArgMatches<'_>) {
     let src = matches.value_of("src").unwrap();
@@ -114,7 +105,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
             }
             used.push(format!("{}:{}", attribute.name.clone(), image_config.name.clone()));
             let image = images.get(image_index).unwrap();
-            combine_layers(&image, &mut target);
+            write_image(&image, &mut target);
             package_image.properties.push(
                 attribute_name_format(image_config.name.as_str())
             );

@@ -2,10 +2,8 @@ use std::fs;
 use rand::{thread_rng, Rng};
 use rand::distributions::Alphanumeric;
 use clap::{ArgMatches};
-use thirtyfour::GenericWebDriver;
-use thirtyfour::http::reqwest_async::ReqwestDriverAsync;
 use thirtyfour::prelude::*;
-use tokio::time::{sleep, Duration};
+use tokio::time::Duration;
 
 use crate::commands::PackageConfig;
 use crate::adapters::metamask;

@@ -1,11 +1,18 @@
 pub mod prepare;
 pub mod package;
+pub mod repackage;
 pub mod publish;
 pub mod unpublish;
 pub mod reconcile;
 
 use serde::{Deserialize, Serialize};
 use inflector::cases::titlecase::to_title_case;
+use image::{
+    ImageBuffer,
+    GenericImageView,
+    DynamicImage,
+    Rgba
+};
 
 /// Config exclude Attribute or AttributeValue by name
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -66,12 +73,11 @@ impl PackageConfig {
             let filter_parts: Vec<&str> = filter.split("=").collect();
             let attribute = attribute_name_format(filter_parts[0]);
             let attribute_value = attribute_name_format(filter_parts[1]);
-            if let property_index = self.properties.iter().position(
+            let property_index = self.properties.iter().position(
                 |property| property.as_str() == attribute.as_str()
-            ).unwrap() {
-                if !property_filters[property_index].contains(&attribute_value) {
-                    property_filters[property_index].push(attribute_value);
-                }
+            ).unwrap();
+            if !property_filters[property_index].contains(&attribute_value) {
+                property_filters[property_index].push(attribute_value);
             }
         }
         property_filters
@@ -80,4 +86,14 @@ impl PackageConfig {
 
 pub fn attribute_name_format(attribute_name: &str) -> String {
     to_title_case(attribute_name)
+}
+
+/// write image source to target buffer
+pub fn write_image(source : &DynamicImage, target: &mut ImageBuffer<Rgba<u8>, Vec<u8>>) {
+    for (x, y, source_pixel) in source.pixels() {
+        let mut target_pixel = target.get_pixel_mut(x, y);
+        if source_pixel.0[3] > 0 {
+            target_pixel.0 = source_pixel.0;
+        }
+    }
 }
