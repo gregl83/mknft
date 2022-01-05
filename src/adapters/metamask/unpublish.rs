@@ -78,8 +78,12 @@ pub async fn unpublish(
 
         sleep(Duration::from_millis(2000)).await;
 
-        let edit_button = driver.find_element(By::XPath("//a[contains(text(), 'Edit')]")).await?;
-        edit_button.click().await?;
+        if let Ok(edit_button) = driver.find_element(By::XPath("//a[contains(text(), 'Edit')]")).await {
+            edit_button.click().await?;
+        } else {
+            // already unpublished show in search results but don't have valid page with edit button
+            continue;
+        }
 
         sleep(Duration::from_millis(2000)).await;
 
