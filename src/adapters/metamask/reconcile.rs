@@ -60,7 +60,6 @@ pub async fn reconcile(
         let collection_asset_search_uri = Url::parse_with_params(
             collection_uri.as_str(),
             query_params
-
         ).unwrap();
 
         driver.get(collection_asset_search_uri.as_str()).await?;
