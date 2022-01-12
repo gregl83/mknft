@@ -133,7 +133,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
                 let image_path = format!("{}/{}.png", image_dest.clone(), sampled);
                 target.save(image_path.clone()).unwrap();
                 hashes.insert(hash.to_owned());
-                package_image.path = image_path.clone();
+                package_image.path = format!("images/{}.png", sampled);
                 package_config.images.push(package_image);
             }
         }

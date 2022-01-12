@@ -32,7 +32,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     let file_package = fs::File::open(
         format!("{}/config.json", src_package)
     ).expect("file should open read only");
-    let package_config: PackageConfig = serde_json::from_reader(file_package).unwrap();
+    let mut package_config: PackageConfig = serde_json::from_reader(file_package).unwrap();
 
     fs::create_dir(dest).unwrap();
     fs::create_dir(image_dest.clone()).unwrap();
@@ -55,7 +55,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     }
 
     // write images
-    for (image_index, image) in package_config.images.iter().enumerate() {
+    for (image_index, image) in package_config.images.iter_mut().enumerate() {
         let layer_sample = layers[0][0].1.borrow();
         let mut target: ImageBuffer::<Rgba<u8>, Vec<_>> = ImageBuffer::new(
         layer_sample.width(),
@@ -70,6 +70,7 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         }
 
         let image_path = format!("{}/{}.png", image_dest.clone(), image_index + 1);
+        image.path = format!("images/{}.png", image_index + 1);
         target.save(image_path.clone()).unwrap();
     }
 
