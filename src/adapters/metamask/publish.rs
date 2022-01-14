@@ -52,7 +52,7 @@ pub async fn publish(
 
         // upload image
         let media_input = driver.find_element(By::XPath("//input[contains(@id, 'media')]")).await?;
-        media_input.send_keys(format!("/home/seluser/{}", image.path)).await?;
+        media_input.send_keys(format!("/home/seluser/collection/{}", image.path)).await?;
 
         // set name
         let name = format!("{} #{}", package_config.name, image.name);
