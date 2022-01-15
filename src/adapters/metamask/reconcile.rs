@@ -72,7 +72,13 @@ pub async fn reconcile(
         ).await?;
 
         let nft_selector = format!("//img[contains(@alt, '{}')]/ancestor::a[1]", name);
-        let nft_links = driver.find_elements(By::XPath(nft_selector.as_str())).await?;
+        let nft_href = driver.find_elements(By::XPath(nft_selector.as_str())).await?;
+        let mut nft_links: Vec<String> = vec![];
+
+        for nft_link in nft_href.iter() {
+            let link = format!("https://opensea.io{}", nft_link.get_attribute("href").await?.unwrap());
+            nft_links.push(link);
+        }
 
         match nft_links.len() {
             0 => {
@@ -140,9 +146,7 @@ pub async fn reconcile(
                 println!("deleting duplicates of {:?}", image.name.clone());
 
                 for nft_link in nft_links[1..].iter() {
-                    let nft_uri = nft_link.get_attribute("href").await?.unwrap();
-
-                    driver.get(nft_uri).await?;
+                    driver.get(nft_link).await?;
 
                     sleep(Duration::from_millis(2000)).await;
 
