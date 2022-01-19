@@ -18,7 +18,13 @@ pub async fn reconcile(
     let collection_uri = format!("https://opensea.io/collection/{}", package_config.id);
 
     // go to create asset to sign request
-    driver.get("https://opensea.io/asset/create").await?;
+    sleep(Duration::from_millis(5000)).await;
+    driver.get("https://opensea.io/account").await?;
+    sleep(Duration::from_millis(5000)).await;
+
+    let metamask_sign = driver.find_element(By::XPath("//div//i[contains(text(), 'settings')]")).await?;
+    metamask_sign.click().await?;
+
     sleep(Duration::from_millis(5000)).await;
 
     let windows = driver.window_handles().await?;

@@ -47,17 +47,31 @@ pub async fn exec(matches: &ArgMatches<'_>) {
     // set implicit to 10 seconds; default is 0
     driver.set_implicit_wait_timeout(Duration::new(60, 0)).await.unwrap();
 
-    metamask::install_extension(
+    match metamask::install_extension(
         &driver,
         metamask_phrase,
         metamask_password.as_str()
-    ).await.unwrap();
-    metamask::login(&driver).await.unwrap();
+    ).await {
+        Ok(_) => println!("metamask installed"),
+        Err(e) => {
+            println!("{:?}", e);
+            driver.quit().await.unwrap();
+            return;
+        },
+    };
+    match metamask::login(&driver).await {
+        Ok(_) => println!("metamask logged in"),
+        Err(e) => {
+            println!("{:?}", e);
+            driver.quit().await.unwrap();
+            return;
+        },
+    };
 
-    metamask::reconcile(&driver, package_config, start, end, wait, property_filters).await.unwrap();
+    match metamask::reconcile(&driver, package_config, start, end, wait, property_filters).await {
+        Ok(_) => println!("done"),
+        Err(e) => println!("{:?}", e),
+    };
 
-    println!("done");
-
-    // cleanup driver connection to selenium chrome
     driver.quit().await.unwrap();
 }
