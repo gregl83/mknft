@@ -55,15 +55,19 @@ pub async fn install_extension(
 }
 
 pub async fn login(driver: &GenericWebDriver<ReqwestDriverAsync>) -> WebDriverResult<()> {
-    driver.get("https://opensea.io/").await?;
-    sleep(Duration::from_secs(10)).await;
-    driver.get("https://opensea.io/").await?;
     // go to OpenSea NFT marketplace login page
-    driver.get("https://opensea.io/login").await?;
+    driver.get("https://opensea.io").await?;
+
+    let metamask_connect_button = driver.find_element(By::XPath("//button//i[contains(text(), 'account_balance_wallet')]")).await?;
+    metamask_connect_button.click().await?;
+
+    sleep(Duration::from_secs(2)).await;
 
     // select metamask connect
     let metamask_connect = driver.find_element(By::XPath("//span[contains(text(), 'MetaMask')]")).await?;
     metamask_connect.click().await?;
+
+    sleep(Duration::from_secs(2)).await;
 
     // select metamask connect window
     let windows = driver.window_handles().await?;

@@ -14,7 +14,6 @@ pub async fn list(
     wait: u64,
     filters: Vec<Vec<String>>
 ) -> WebDriverResult<()> {
-    let collection_asset_create_uri = format!("https://opensea.io/collection/{}/assets/create", package_config.id);
     let collection_uri = format!("https://opensea.io/collection/{}", package_config.id);
 
     // go to create asset to sign request
@@ -85,25 +84,18 @@ pub async fn list(
 
         sleep(Duration::from_millis(2000)).await;
 
-        // let edit_button = driver.find_element(By::XPath("//a[contains(text(), 'Edit')]")).await?;
-        // edit_button.click().await?;
-        //
-        // sleep(Duration::from_millis(2000)).await;
-        //
-        // driver.execute_script(r#"
-        //     window.scrollBy(0,document.body.scrollHeight);
-        //     "#
-        // ).await?;
-        //
-        // let delete_button = driver.find_element(By::XPath("//button[contains(text(), 'Delete item')]")).await?;
-        // delete_button.click().await?;
-        //
-        // sleep(Duration::from_millis(2000)).await;
-        //
-        // let confirm_delete_button = driver.find_element(By::XPath("//footer//button[contains(text(), 'Delete item')]")).await?;
-        // confirm_delete_button.click().await?;
-        //
-        // sleep(Duration::from_millis(2000)).await;
+        let sell_button = driver.find_element(By::XPath("//a[contains(text(), 'Sell')]")).await?;
+        sell_button.click().await?;
+
+        let price_input = driver.find_element(By::XPath("//input[@name='price']")).await?;
+        price_input.send_keys("0.0045").await?; // fixme - based off calculation
+
+        driver.execute_script("$x(\"//button//div[contains(text(), '1 month')]\").innerHTML = 'February 2, 2022 (12:00 AM) - March 5, 2022 (12:00 AM)';").await?;
+
+        // let complete_listing_button = driver.find_element(By::XPath("//footer//button[contains(text(), 'Complete listing')]")).await?;
+        // complete_listing_button.click().await?;
+
+        sleep(Duration::from_millis(60000)).await;
 
         println!("completed {:?}", image.name.clone());
 
