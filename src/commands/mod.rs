@@ -4,6 +4,7 @@ pub mod repackage;
 pub mod publish;
 pub mod unpublish;
 pub mod reconcile;
+pub mod list;
 
 use serde::{Deserialize, Serialize};
 use inflector::cases::titlecase::to_title_case;
