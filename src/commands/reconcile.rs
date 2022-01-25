@@ -37,6 +37,8 @@ pub async fn exec(matches: &ArgMatches<'_>) {
 
     let mut caps = DesiredCapabilities::chrome();
 
+    caps.add_chrome_arg("start-maximized").unwrap();
+    caps.add_chrome_arg("--disable-blink-features=AutomationControlled").unwrap();
     caps.add_extension(metamask_crx.as_ref()).unwrap();
 
     let driver = WebDriver::new(

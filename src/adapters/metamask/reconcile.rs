@@ -88,62 +88,65 @@ pub async fn reconcile(
 
         match nft_links.len() {
             0 => {
-                println!("creating {:?}", image.name.clone());
+                let not_found = driver.find_element(By::XPath("//button[contains(text(), 'Back to all Items')]")).await;
+                if not_found.is_ok() {
+                    println!("creating {:?}", image.name.clone());
 
-                // create asset
-                driver.get(collection_asset_create_uri.as_str()).await?;
-                sleep(Duration::from_millis(2000)).await;
+                    // create asset
+                    driver.get(collection_asset_create_uri.as_str()).await?;
+                    sleep(Duration::from_millis(2000)).await;
 
-                // upload image
-                let media_input = driver.find_element(By::XPath("//input[contains(@id, 'media')]")).await?;
-                media_input.send_keys(format!("/home/seluser/collection/{}", image.path)).await?;
+                    // upload image
+                    let media_input = driver.find_element(By::XPath("//input[contains(@id, 'media')]")).await?;
+                    media_input.send_keys(format!("/home/seluser/collection/{}", image.path)).await?;
 
-                // set name
-                let name = format!("{} #{}", package_config.name, image.name);
-                let name_input = driver.find_element(By::XPath("//input[contains(@id, 'name')]")).await?;
-                name_input.send_keys(name.clone()).await?;
+                    // set name
+                    let name = format!("{} #{}", package_config.name, image.name);
+                    let name_input = driver.find_element(By::XPath("//input[contains(@id, 'name')]")).await?;
+                    name_input.send_keys(name.clone()).await?;
 
-                // set description
-                let description = format!("**#{}** - {} collection", image.name, package_config.name);
-                let description_input = driver.find_element(By::XPath("//textarea[contains(@id, 'description')]")).await?;
-                description_input.send_keys(description).await?;
+                    // set description
+                    let description = format!("**#{}** - {} collection", image.name, package_config.name);
+                    let description_input = driver.find_element(By::XPath("//textarea[contains(@id, 'description')]")).await?;
+                    description_input.send_keys(description).await?;
 
-                // set external link
-                if let Some(image_uri) = image.uri.clone() {
-                    let link_input = driver.find_element(By::XPath("//input[contains(@id, 'external_link')]")).await?;
-                    link_input.send_keys(image_uri).await?;
-                }
-
-                // add properties
-                let property_button = driver.find_element(By::XPath("//button[contains(@aria-label, 'Add properties')]")).await?;
-                property_button.click().await?;
-                for (index, property) in image.properties.iter().enumerate() {
-                    let xpath = format!("//tbody//tr[{}]", index + 1);
-
-                    let name_xpath = format!("{}//div[contains(concat(' ',@class,' '),' AssetPropertiesForm--name-input ')]//input", xpath);
-                    let property_name_input = driver.find_element(By::XPath(name_xpath.as_str())).await?;
-                    property_name_input.send_keys(package_config.properties[index].clone()).await?;
-
-                    let property_xpath = format!("{}//div[contains(concat(' ',@class,' '),' AssetPropertiesForm--value-input ')]//input", xpath);
-                    let property_value_input = driver.find_element(By::XPath(property_xpath.as_str())).await?;
-                    property_value_input.send_keys(property).await?;
-
-                    if index + 1 < package_config.properties.len() {
-                        let add_more_button = driver.find_element(By::XPath("//button[contains(text(), 'Add more')]")).await?;
-                        add_more_button.click().await?;
+                    // set external link
+                    if let Some(image_uri) = image.uri.clone() {
+                        let link_input = driver.find_element(By::XPath("//input[contains(@id, 'external_link')]")).await?;
+                        link_input.send_keys(image_uri).await?;
                     }
+
+                    // add properties
+                    let property_button = driver.find_element(By::XPath("//button[contains(@aria-label, 'Add properties')]")).await?;
+                    property_button.click().await?;
+                    for (index, property) in image.properties.iter().enumerate() {
+                        let xpath = format!("//tbody//tr[{}]", index + 1);
+
+                        let name_xpath = format!("{}//div[contains(concat(' ',@class,' '),' AssetPropertiesForm--name-input ')]//input", xpath);
+                        let property_name_input = driver.find_element(By::XPath(name_xpath.as_str())).await?;
+                        property_name_input.send_keys(package_config.properties[index].clone()).await?;
+
+                        let property_xpath = format!("{}//div[contains(concat(' ',@class,' '),' AssetPropertiesForm--value-input ')]//input", xpath);
+                        let property_value_input = driver.find_element(By::XPath(property_xpath.as_str())).await?;
+                        property_value_input.send_keys(property).await?;
+
+                        if index + 1 < package_config.properties.len() {
+                            let add_more_button = driver.find_element(By::XPath("//button[contains(text(), 'Add more')]")).await?;
+                            add_more_button.click().await?;
+                        }
+                    }
+                    let save_properties_button = driver.find_element(By::XPath("//button[contains(text(), 'Save')]")).await?;
+                    save_properties_button.click().await?;
+
+                    // create/mint nft
+                    let create_button = driver.find_element(By::XPath("//button[contains(text(), 'Create')]")).await?;
+                    create_button.click().await?;
+
+                    // verify complete
+                    let expected_completion_message = format!("//h4[contains(text(), 'You created {}!')]", name.clone());
+                    let completion_message = driver.find_element(By::XPath(expected_completion_message.as_str())).await?;
+                    completion_message.wait_until().displayed().await?;
                 }
-                let save_properties_button = driver.find_element(By::XPath("//button[contains(text(), 'Save')]")).await?;
-                save_properties_button.click().await?;
-
-                // create/mint nft
-                let create_button = driver.find_element(By::XPath("//button[contains(text(), 'Create')]")).await?;
-                create_button.click().await?;
-
-                // verify complete
-                let expected_completion_message = format!("//h4[contains(text(), 'You created {}!')]", name.clone());
-                let completion_message = driver.find_element(By::XPath(expected_completion_message.as_str())).await?;
-                completion_message.wait_until().displayed().await?;
             },
             1 => {
                 continue;

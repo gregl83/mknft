@@ -21,51 +21,46 @@ pub async fn install_extension(
     driver.switch_to().window(&windows[0]).await?;
 
     // getting started page
-    let get_started_button = driver.find_element(By::XPath("//div[contains(@id, 'app-content')]//button")).await?;
+    let get_started_button = driver.find_element(By::XPath("//button[contains(text(), 'Get Started')]")).await?;
     get_started_button.click().await?;
 
     // import or create new page
-    let import_button = driver.find_element(By::XPath("//div[contains(@id, 'app-content')]//button")).await?;
+    let import_button = driver.find_element(By::XPath("//button[contains(text(), 'Import wallet')]")).await?;
     import_button.click().await?;
 
     // provide feedback opt-in page
-    let no_thanks_button = driver.find_element(By::XPath("//div[contains(@id, 'app-content')]//button")).await?;
+    let no_thanks_button = driver.find_element(By::XPath("//button[contains(text(), 'No Thanks')]")).await?;
     no_thanks_button.click().await?;
 
     // import form page
-    let inputs = driver.find_elements(By::XPath("//div[contains(@id, 'app-content')]//input[contains(concat(' ',@class,' '),' MuiInputBase-input ')]")).await?;
+    let inputs = driver.find_elements(By::XPath("//input")).await?;
     inputs[0].send_keys(phrase).await?;
     inputs[1].send_keys(password.clone()).await?;
     inputs[2].send_keys(password).await?;
     let terms_checkbox = driver.find_element(By::ClassName("first-time-flow__terms")).await?;
     terms_checkbox.click().await?;
-    let submit_button = driver.find_element(By::XPath("//div[contains(@id, 'app-content')]//button")).await?;
+    let submit_button = driver.find_element(By::XPath("//button[contains(text(), 'Import')]")).await?;
     submit_button.click().await?;
 
     // fixme - without following sleep, selenium gets stale object
     sleep(Duration::from_secs(2)).await;
 
     // import results page
-    let ok_button = driver.find_element(By::XPath("//div[contains(@id, 'app-content')]//button")).await?;
-    ok_button.click().await?;
+    let all_done_button = driver.find_element(By::XPath("//button[contains(text(), 'All Done')]")).await?;
+    all_done_button.click().await?;
 
     WebDriverResult::Ok(())
 }
 
 pub async fn login(driver: &GenericWebDriver<ReqwestDriverAsync>) -> WebDriverResult<()> {
+    driver.get("https://opensea.io/").await?;
+    sleep(Duration::from_secs(10)).await;
+    driver.get("https://opensea.io/").await?;
     // go to OpenSea NFT marketplace login page
     driver.get("https://opensea.io/login").await?;
 
-    // connect compatible wallet
-    let metamask_item = driver.find_element(By::XPath("//button//i[contains(text(), 'menu')]")).await?;
-    metamask_item.click().await?;
-
-    // connect wallet
-    let connect_wallet_button = driver.find_element(By::XPath("//button[contains(text(), 'Connect wallet')]")).await?;
-    connect_wallet_button.click().await?;
-
     // select metamask connect
-    let metamask_connect = driver.find_element(By::XPath("//li//button//div//span[contains(text(), 'MetaMask')]")).await?;
+    let metamask_connect = driver.find_element(By::XPath("//span[contains(text(), 'MetaMask')]")).await?;
     metamask_connect.click().await?;
 
     // select metamask connect window
