@@ -1,6 +1,7 @@
 use tokio::time::{sleep, Duration};
 use thirtyfour::GenericWebDriver;
 use thirtyfour::http::reqwest_async::ReqwestDriverAsync;
+use thirtyfour::Keys::{Down, Enter, Shift, Tab, Up};
 use thirtyfour::prelude::*;
 use url::Url;
 
@@ -39,6 +40,12 @@ pub async fn list(
 
     let mut counter = 0;
     for image in package_config.images[start..end].iter() {
+        if image.floor_price.is_none() {
+            continue;
+        }
+
+        let floor_price = image.floor_price.unwrap();
+
         let name = format!("{} #{}", package_config.name, image.name);
         let mut query_params: Vec<(String, &str)> = vec![
             (String::from("search[query]"), &name),
@@ -88,14 +95,70 @@ pub async fn list(
         sell_button.click().await?;
 
         let price_input = driver.find_element(By::XPath("//input[@name='price']")).await?;
-        price_input.send_keys("0.0045").await?; // fixme - based off calculation
+        price_input.send_keys(format!("{}", floor_price)).await?; // fixme - based off calculation
 
-        driver.execute_script("$x(\"//button//div[contains(text(), '1 month')]\").innerHTML = 'February 2, 2022 (12:00 AM) - March 5, 2022 (12:00 AM)';").await?;
+        let duration_button = driver.find_element(By::XPath("//button[@id='duration']")).await?;
+        duration_button.click().await?;
 
-        // let complete_listing_button = driver.find_element(By::XPath("//footer//button[contains(text(), 'Complete listing')]")).await?;
-        // complete_listing_button.click().await?;
+        sleep(Duration::from_millis(1000)).await;
 
-        sleep(Duration::from_millis(60000)).await;
+        let modal = driver.find_element(By::XPath("//div[@data-tippy-root='']")).await?;
+        modal.click().await?;
+
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        sleep(Duration::from_millis(100)).await;
+        driver.switch_to().active_element().await?.send_keys("03").await?;
+        sleep(Duration::from_millis(100)).await;
+        driver.switch_to().active_element().await?.send_keys(Shift + Tab).await?;
+        sleep(Duration::from_millis(100)).await;
+        driver.switch_to().active_element().await?.send_keys("02").await?;
+        sleep(Duration::from_millis(1000)).await;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        sleep(Duration::from_millis(100)).await;
+        driver.switch_to().active_element().await?.send_keys("03").await?;
+        sleep(Duration::from_millis(100)).await;
+        driver.switch_to().active_element().await?.send_keys(Shift + Tab).await?;
+        sleep(Duration::from_millis(100)).await;
+        driver.switch_to().active_element().await?.send_keys("03").await?;
+        sleep(Duration::from_millis(1000)).await;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys("12").await?;
+        driver.switch_to().active_element().await?.send_keys("00").await?;
+        driver.switch_to().active_element().await?.send_keys(Tab).await?;
+        driver.switch_to().active_element().await?.send_keys("12").await?;
+        driver.switch_to().active_element().await?.send_keys("00").await?;
+        driver.switch_to().active_element().await?.send_keys(Enter).await?;
+
+        let complete_listing_button = driver.find_element(By::XPath("//button[contains(text(), 'Complete listing')]")).await?;
+        complete_listing_button.click().await?;
+
+        sleep(Duration::from_millis(1000)).await;
+
+        let sign_button = driver.find_element(By::XPath("//div[@class='ActionPanel--content']//button[contains(text(), 'Sign')]")).await?;
+        sign_button.click().await?;
+
+        sleep(Duration::from_millis(1000)).await;
+
+        let windows = driver.window_handles().await?;
+        driver.switch_to().window(&windows[2]).await?;
+
+        let sign = driver.find_element(By::XPath("//button[contains(text(), 'Sign')]")).await?;
+        sign.click().await?;
+        sleep(Duration::from_millis(1000)).await;
+
+        // select main tab
+        let windows = driver.window_handles().await?;
+        driver.switch_to().window(&windows[0]).await?;
 
         println!("completed {:?}", image.name.clone());
 

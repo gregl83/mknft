@@ -149,6 +149,7 @@ pub async fn reconcile(
                 }
             },
             1 => {
+                sleep(Duration::from_millis(2000)).await;
                 continue;
             },
             _ => {

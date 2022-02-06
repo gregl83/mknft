@@ -53,6 +53,7 @@ pub struct ProjectConfig {
 pub struct Image {
     pub name: String,
     pub uri: Option<String>,
+    pub floor_price: Option<f32>,
     pub probability: f32,
     pub properties: Vec<String>,
     pub path: String,

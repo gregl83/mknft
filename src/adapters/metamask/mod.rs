@@ -1,5 +1,5 @@
 use tokio::time::{sleep, Duration};
-use thirtyfour::GenericWebDriver;
+use thirtyfour::{GenericWebDriver, OptionRect};
 use thirtyfour::http::reqwest_async::ReqwestDriverAsync;
 use thirtyfour::prelude::*;
 
@@ -55,11 +55,17 @@ pub async fn install_extension(
 }
 
 pub async fn login(driver: &GenericWebDriver<ReqwestDriverAsync>) -> WebDriverResult<()> {
-    // go to OpenSea NFT marketplace login page
-    driver.get("https://opensea.io").await?;
+    let r = OptionRect::new().with_size(1050, 850);
+    driver.set_window_rect(r).await?;
 
-    let metamask_connect_button = driver.find_element(By::XPath("//button//i[contains(text(), 'account_balance_wallet')]")).await?;
+    // go to OpenSea NFT marketplace login page
+    driver.get("https://opensea.io/").await?;
+
+    let metamask_connect_button = driver.find_element(By::XPath("//button//i[contains(text(), 'menu')]")).await?;
     metamask_connect_button.click().await?;
+
+    let connect_button = driver.find_element(By::XPath("//button[contains(text(), 'Connect wallet')]")).await?;
+    connect_button.click().await?;
 
     sleep(Duration::from_secs(2)).await;
 
