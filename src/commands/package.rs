@@ -79,7 +79,6 @@ pub async fn exec(matches: &ArgMatches<'_>) {
         let mut package_image = Image {
             name: image_name.clone(),
             uri: image_uri,
-            floor_price: None,
             probability: 1.0 as f32,
             properties: vec![],
             path: String::new()
