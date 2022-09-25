@@ -16,27 +16,25 @@ Toolset to create NFTs from Photoshop layer group combinations.
 ## Requirements
 
 - Photoshop PSD (layers in groups)
-- Size of output collection cannot be too close to total number of possible combinations
-
-// todo
+- Rust / Cargo
 
 ## Limitations
 
 - Photoshop layers **must** not have hidden pixels outside canvas
-
-// todo
-
-## Usage
-
-// todo
+- Size of output collection cannot be too close to total number of possible combinations (due to random selection)
 
 ## Installation
 
-// todo
+1. [Install Rust and Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
+2. Install `mknft` using Cargo command: `cargo install mknft`
 
-## API
+## Usage
 
-// todo
+Help menu can be displayed using `--help` or `-h` option with any `mknft` command.
+
+```bash
+$ mknft --help
+```
 
 ## Example Project
 
