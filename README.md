@@ -2,6 +2,10 @@
 
 Toolset to create NFTs from Photoshop layer group combinations.
 
+`mknft` was created rather quickly to POC a NFT project. Originally it included tools to deploy NFTs to the OpenSea marketplace but policy changes in their service now prevent that solution from being viable. Features were subsequently removed from `mknft` in order to provide a minimum toolset for generating NFT, images, using Photoshop layer group combinations. There is the possibility of this package including a deployment mechanism to the Polygon network in the future, but that's far from a guarantee.
+
+## Features
+
 - Attributes are organized by PSD layer groups
 - Attribute values comprised of layers in each group
 - Combinations of attribute values, random layers from groups, for unique NFTs
@@ -30,10 +34,42 @@ Toolset to create NFTs from Photoshop layer group combinations.
 
 ## Usage
 
+`mknft` is a command line interface utility.
+
+### Project States
+
+NFT projects have been broken down into three distinct states.
+
+Each state created by `mknft` produces a new directory with respective configuration and assets. These directories are NOT meant to be the same path for other states. They must be unique to prevent file name collisions.
+
+#### Photoshop Project
+
+This state is not created by `mknft`.
+
+The project directory should contain a structured Photoshop project file (PSD) with a configuration file identifying layers and weights.
+
+#### Prepared Project
+
+This state represents a configuration of the prepared layer images without each individual generated NFT. The preapred project can be used to generate new combinations of NFTs more than once using the same parameters but, due to probablistic outcomes, *should* produce different results each execution.
+
+#### Packaged Project
+
+The final state for making NFTs. The results of this state include a configuration file identifying attributes and name of each NFT. This configuration file can be used to publish NFTs.
+
+This state includes ALL the final NFT files and will consume disk space respectively.
+
+### Command Help
+
 Help menu can be displayed using `--help` or `-h` option with any `mknft` command.
 
 ```bash
 $ mknft --help
+```
+
+OR
+
+```bash
+$ mknft prepare --help
 ```
 
 ## Example Project
